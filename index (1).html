@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FFF9F0">
+<title>晴天烏龜祈願所</title>
+<meta name="author" content="Peggy Lin">
+
+<!-- 字體：Chiron GoRound TC（Google Fonts，可變字重 200～900） -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&display=swap" rel="stylesheet">
+<meta name="description" content="畫一顆太陽，陪 66 隻小烏龜一起迎接好天氣。以臺灣民間祈晴習俗為靈感的春日祈願小遊戲，完成後可下載專屬祝福卡。">
+<meta name="application-name" content="晴天烏龜祈願所">
+<meta name="apple-mobile-web-app-title" content="晴天烏龜">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+
+<!-- 圖示與 PWA 設定（路徑皆為相對路徑，放在 GitHub Pages 子路徑下也能正常運作） -->
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+
+<!-- 分享預覽（LINE / Facebook / Threads 等）。og:image 與 og:url 必須是完整網址；
+     若 repo 名稱不是 Sunny-turtle-wish，請一併修改下面三處網址 -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="晴天烏龜祈願所">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:title" content="晴天烏龜祈願所">
+<meta property="og:description" content="畫一顆太陽，陪 66 隻小烏龜一起迎接好天氣，完成後可下載專屬祝福卡。">
+<meta property="og:url" content="https://peggy960022-prog.github.io/Sunny-turtle-wish/">
+<meta property="og:image" content="https://peggy960022-prog.github.io/Sunny-turtle-wish/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="晴天烏龜祈願所：太陽與小烏龜的圖示">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="晴天烏龜祈願所">
+<meta name="twitter:description" content="畫一顆太陽，陪 66 隻小烏龜一起迎接好天氣。">
+<meta name="twitter:image" content="https://peggy960022-prog.github.io/Sunny-turtle-wish/og-image.png">
+<style>
+/* =========================================================
+   基本設定與色彩（配色還原為 1.0：鼠尾草綠 × 奶油白 × 蜂蜜黃 × 杏桃橘）
+   ========================================================= */
+:root{
+  --cream:#FFF9F0; --brand:#F2B99B; --brand-text:#4A3428; --pumpkin:#F2B99B; --honey:#F6D77A;
+  --butter:#FFF3D6; --olive:#A9C7A0; --olive-dk:#7FA277;
+  --sage:#A9C7A0; --leaf:#DCEBD3; --brick:#A8432B; --sky:#DCECF3; --ivory:#FFFFFF;
+  --cocoa:#6B5143; --caramel:#E4D8C6; --ink:#4A3428; --muted:#8A6F5E; --danger:#A8432B;
+  --sky-soft:#EAF6FB; --grass:#DCEBD3;
+  --shadow:0 8px 24px rgba(107,81,67,.12);
+  --padL:max(16px,env(safe-area-inset-left)); --padR:max(16px,env(safe-area-inset-right));
+  --font:'Chiron GoRound TC','PingFang TC','Microsoft JhengHei','Noto Sans TC','Noto Sans CJK TC','Heiti TC','WenQuanYi Micro Hei',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (max-width:360px){:root{--padL:max(12px,env(safe-area-inset-left)); --padR:max(12px,env(safe-area-inset-right))}}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; font-family:var(--font); color:var(--cocoa); line-height:1.65; font-size:16px;
+  background:linear-gradient(180deg,#F4FAFC 0,#FFF9F0 260px) var(--cream);
+  min-height:100vh; overflow-x:hidden; transition:background .8s;
+}
+body.sunny{background:linear-gradient(180deg,#FFF3C9 0,#FFF9F0 340px) var(--cream)}
+body.modal-open{overflow:hidden}
+h1,h2,h3{color:var(--ink); line-height:1.35; margin:0}
+h1:focus,h2:focus{outline:none}
+p{margin:0}
+button,input,select,textarea{font-family:inherit}
+button{touch-action:manipulation}
+
+.app{position:relative; z-index:2; max-width:880px; margin:0 auto; padding:0 var(--padR) calc(48px + env(safe-area-inset-bottom)) var(--padL)}
+.stage{display:none}
+.stage.active{display:block; animation:stageIn .5s ease both}
+.stage.leaving{display:block; animation:stageOut .22s ease both}
+@keyframes stageIn{from{opacity:0; transform:translateY(10px)}to{opacity:1; transform:none}}
+@keyframes stageOut{from{opacity:1}to{opacity:0; transform:translateY(-6px)}}
+
+/* 頂部進度 */
+.topbar{position:sticky; top:0; z-index:20; margin:0 calc(-1*var(--padR)) 12px calc(-1*var(--padL));
+  padding:calc(10px + env(safe-area-inset-top)) var(--padR) 8px var(--padL);
+  background:rgba(255,249,240,.94); backdrop-filter:blur(6px); border-bottom:2px solid #DCEBD3}
+.topbar-row{display:flex; justify-content:space-between; align-items:baseline; gap:8px}
+.brand{font-weight:800; color:var(--brand-text); font-size:1rem}
+.step-text{font-size:.9rem; color:var(--muted); font-weight:700}
+.progress-track{height:12px; background:#EBE3D6; border-radius:999px; overflow:hidden; margin-top:6px}
+.progress-fill{height:100%; width:0; background:linear-gradient(90deg,var(--sage),var(--honey)); border-radius:999px; transition:width .7s cubic-bezier(.3,.8,.3,1)}
+.steps{list-style:none; display:flex; gap:4px; margin:8px 0 0; padding:0}
+.steps li{flex:1; text-align:center; font-size:.8rem; color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:3px; min-width:0}
+.steps li::before{content:""; width:12px; height:12px; border-radius:50%; border:2px solid var(--sage); background:#fff; transition:transform .3s, background .3s}
+.steps li.done::before{background:var(--sage)}
+.steps li[aria-current="step"]{color:var(--ink); font-weight:800}
+.steps li[aria-current="step"]::before{background:var(--brand); border-color:#E49F7C; transform:scale(1.3)}
+.steps .lbl{display:none}
+@media (min-width:720px){.steps .lbl{display:block}.step-text{display:none}}
+
+/* 標題區與卡片 */
+.stage-head{text-align:center; margin:18px 0 16px}
+.stage-head h2{font-size:clamp(1.4rem,4.6vw,1.9rem)}
+.stage-head h2::after{content:""; display:block; width:84px; height:7px; border-radius:7px; background:linear-gradient(90deg,var(--sage),var(--honey)); margin:10px auto 0}
+.hint{margin-top:8px; font-size:1rem; color:var(--cocoa)}
+.card{background:var(--ivory); border-radius:22px; box-shadow:var(--shadow); padding:clamp(16px,4vw,28px); margin-bottom:18px; border:2px solid #F3ECE0}
+.note{font-size:.95rem; line-height:1.75; background:var(--ivory); border:2px dashed var(--sage); border-radius:18px; padding:12px 16px; margin:18px auto 0; max-width:640px; text-align:center}
+
+/* 按鈕 */
+.btn{appearance:none; -webkit-appearance:none; border:2.5px solid transparent; border-radius:999px; padding:12px 22px; min-height:48px;
+  font-weight:800; font-size:1.02rem; cursor:pointer; color:var(--ink); line-height:1.3; text-align:center;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  transition:transform .18s, box-shadow .18s, background .2s, opacity .2s}
+.btn.primary{background:var(--sage); border-color:#8FB486; box-shadow:0 4px 0 #8FB486}
+.btn.accent{background:var(--brand); border-color:#E49F7C; box-shadow:0 4px 0 #E49F7C}
+.btn.secondary{background:#fff; border-color:var(--sage); color:var(--cocoa); box-shadow:0 3px 0 #DCEBD3}
+.btn.big{font-size:1.12rem; padding:14px 28px; min-height:54px}
+@media (hover:hover){.btn:not(:disabled):hover{transform:translateY(-1px) scale(1.04)}}
+.btn:not(:disabled):active{transform:translateY(3px) scale(.98); box-shadow:none}
+.btn:focus-visible,.turtle:focus-visible,.pick:focus-visible,.link-btn:focus-visible,.paper:focus-visible{outline:3px solid #D9773F; outline-offset:3px}
+.btn:disabled{opacity:.5; cursor:not-allowed; box-shadow:none}
+.btn-row{display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:18px}
+.btn-row .btn{flex:0 1 auto}
+@media (max-width:560px){
+  .btn-row{flex-direction:column-reverse}
+  .btn-row .btn{width:100%}
+}
+.link-btn{background:none; border:none; color:var(--cocoa); text-decoration:underline; font-weight:700; cursor:pointer; padding:10px 4px; min-height:44px; font-size:.95rem}
+
+/* 表單 */
+.field{margin-bottom:16px}
+.field label{display:block; font-weight:800; color:var(--ink); margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%; padding:12px 14px; font-size:16px; color:var(--cocoa); background:#fff;
+  border:2px solid #CFE0C8; border-radius:16px; min-height:48px; transition:border-color .2s, box-shadow .2s; scroll-margin:96px}
+.field textarea{resize:vertical; line-height:1.7; min-height:140px}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none; border-color:var(--brand); box-shadow:0 0 0 4px rgba(242,185,155,.35)}
+.field [aria-invalid="true"]{border-color:#D9774F; background:#FFF6F2}
+.field-row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+@media (max-width:560px){.field-row{grid-template-columns:1fr}}
+.err{color:var(--danger); font-weight:700; font-size:.95rem; margin-top:6px; min-height:0}
+.err:empty{display:none}
+
+/* 首頁 */
+.home-head{text-align:center; margin:22px 0 14px}
+.home-head h1{font-size:clamp(2rem,8vw,3.1rem); letter-spacing:.06em; color:var(--ink)}
+.subtitle{margin-top:8px; font-size:clamp(1rem,3.4vw,1.2rem); color:var(--cocoa); font-weight:600}
+.hero{position:relative; width:100%; max-width:760px; margin:0 auto; aspect-ratio:16/10; border-radius:30px; overflow:hidden;
+  background:linear-gradient(180deg,#DCECF3 0%,#EEF6F4 55%,#FFF9F0 100%); box-shadow:var(--shadow); border:3px solid #fff}
+@media (max-width:560px){.hero{aspect-ratio:1/1}}
+@media (orientation:landscape) and (max-height:480px){.hero{aspect-ratio:16/8}}
+.hero .h-halo{position:absolute; left:50%; top:25%; width:62%; aspect-ratio:1; transform:translate(-50%,-50%); border-radius:50%;
+  background:radial-gradient(circle,rgba(246,215,122,.55),rgba(246,215,122,0) 68%); animation:pulse 4.5s ease-in-out infinite}
+.hero .h-sun{position:absolute; left:50%; top:25%; width:30%; transform:translate(-50%,-50%)}
+.hero .h-sun svg{width:100%; display:block; animation:pulseSmall 4.5s ease-in-out infinite}
+.hero .h-cloud{position:absolute; animation:drift 20s ease-in-out infinite alternate}
+.hero .h-cloud svg{width:100%; display:block}
+.hero .h-hill{position:absolute; left:0; bottom:0; width:100%; height:48%}
+.hero .h-hill svg{width:100%; height:100%; display:block}
+.hero .h-flower{position:absolute; width:6%}
+.hero .h-flower svg{width:100%; display:block; transform-origin:50% 100%; animation:sway 4s ease-in-out infinite alternate}
+.hero-turtle{position:absolute}
+.hero-turtle svg{width:100%; display:block; transform-origin:50% 100%; animation:breathe 4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.75; transform:translate(-50%,-50%) scale(1)}50%{opacity:1; transform:translate(-50%,-50%) scale(1.12)}}
+@keyframes pulseSmall{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+@keyframes drift{from{transform:translateX(-18%)}to{transform:translateX(22%)}}
+@keyframes sway{from{transform:rotate(-4deg)}to{transform:rotate(4deg)}}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.02,1.045)}}
+@keyframes blink{0%,91%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+.t-eye{transform-box:fill-box; transform-origin:center}
+.hero-turtle .t-eye,.r-turtle .t-eye,.turtle.done .t-eye{animation:blink 5s infinite var(--bd,0s)}
+
+/* 太陽挑選與畫紙（第二階段） */
+.sun-picker{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px}
+.pick{background:#fff; border:3px solid #E7DECF; border-radius:20px; padding:8px 6px 10px; min-height:96px; cursor:pointer; color:var(--cocoa);
+  display:flex; flex-direction:column; align-items:center; gap:2px; font-weight:800; transition:transform .18s, border-color .2s, background .2s}
+.pick svg{width:56px; height:56px}
+.pick[aria-checked="true"]{border-color:#E49F7C; background:#FFF3D6; box-shadow:0 0 0 3px rgba(242,185,155,.35)}
+.pick .tick{font-size:.85rem; color:var(--muted); font-weight:700}
+.pick[aria-checked="true"] .tick{color:var(--ink)}
+@media (hover:hover){.pick:hover{transform:translateY(-2px)}}
+.paper-wrap{background:var(--sky); border-radius:28px; padding:clamp(10px,3vw,22px); transition:background 1s, box-shadow 1s}
+.paper-wrap.bright{background:#EAF6FB; box-shadow:0 0 0 6px rgba(246,215,122,.4), var(--shadow)}
+.paper{position:relative; aspect-ratio:4/3; background:#FFFDF8; border:3px solid #E4D8C6; cursor:crosshair; touch-action:pan-y; user-select:none; -webkit-user-select:none;
+  border-radius:22px 30px 24px 34px / 30px 22px 34px 24px; overflow:hidden;
+  background-image:repeating-linear-gradient(0deg,transparent 0 31px,rgba(169,199,160,.2) 31px 32px)}
+@media (orientation:landscape) and (max-height:480px){.paper{aspect-ratio:16/9}}
+.paper::before{content:""; position:absolute; inset:8px; border:2px dashed #EADFCB; border-radius:18px; pointer-events:none}
+.paper-empty{position:absolute; inset:0; display:grid; place-items:center; text-align:center; padding:20px; color:var(--muted); font-weight:800; pointer-events:none; font-size:1.05rem}
+.sun-piece{position:absolute; width:34%; aspect-ratio:1; transform:translate(-50%,-50%); cursor:grab; touch-action:none}
+.sun-piece.dragging{cursor:grabbing}
+.sun-piece svg{width:100%; height:100%; display:block; animation:pulseSmall 4.5s ease-in-out infinite; pointer-events:none}
+.sun-piece.pop{animation:sunPop .8s cubic-bezier(.3,1.5,.5,1)}
+@keyframes sunPop{0%{transform:translate(-50%,-50%) scale(.2); opacity:0}70%{transform:translate(-50%,-50%) scale(1.12); opacity:1}100%{transform:translate(-50%,-50%) scale(1)}}
+.success{min-height:1.7em; margin-top:12px; text-align:center; font-weight:800; color:var(--ink)}
+
+/* 烏龜草地（第三階段） */
+.counter{background:var(--ivory); border:3px solid var(--caramel); border-radius:20px; padding:12px 16px; box-shadow:var(--shadow); margin-bottom:14px}
+.counter-top{display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap}
+.count-text{font-size:1.25rem; font-weight:800; color:var(--ink)}
+.count-sub{font-size:.95rem}
+.special-sub{margin-top:4px; font-size:.95rem; font-weight:700; color:var(--cocoa)}
+.bar{height:14px; background:#EBE3D6; border-radius:999px; overflow:hidden; margin-top:8px}
+.bar-fill{height:100%; width:0; background:linear-gradient(90deg,var(--sage),var(--honey)); border-radius:999px; transition:width .5s cubic-bezier(.3,.8,.3,1)}
+.banner{margin:0 0 14px; text-align:center; font-weight:800; font-size:1.2rem; color:var(--ink); background:#FFF3D6; border:3px solid var(--honey); border-radius:20px; padding:12px; animation:bannerIn .7s cubic-bezier(.3,1.5,.5,1)}
+@keyframes bannerIn{from{opacity:0; transform:scale(.8)}to{opacity:1; transform:none}}
+.call-cards{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:10px}
+@media (max-width:560px){.call-cards{grid-template-columns:1fr}}
+.call-card{background:#fff; border:2px solid #F3ECE0; border-top:7px solid var(--honey); border-radius:20px; padding:12px 16px 16px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:8px}
+.call-card h3{font-size:1.1rem; color:var(--brand-text)}
+.call-desc{font-size:.95rem; line-height:1.6}
+.call-note{font-size:1rem; font-weight:800; color:var(--ink); border-left:5px solid var(--honey); padding:2px 0 2px 10px}
+.call-card .btn{margin-top:auto; width:100%}
+.call-status{min-height:1.6em; text-align:center; font-weight:700; color:var(--ink); margin-bottom:8px; font-size:.95rem}
+.tools{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:12px}
+.tools .btn{min-height:44px; padding:8px 16px; font-size:.95rem}
+.meadow{border-radius:26px; overflow:hidden; background:var(--sky); box-shadow:var(--shadow); border:3px solid var(--caramel)}
+.m-sky{position:relative; height:150px; overflow:hidden; background:var(--sky)}
+.m-sky .m-sun{position:absolute; top:50%; width:120px; height:120px; transform:translate(-50%,-50%); left:clamp(70px,var(--sx,50%),calc(100% - 70px))}
+.m-sky .m-sun svg{width:100%; height:100%; animation:pulseSmall 4.5s ease-in-out infinite}
+.m-sky .cloud{position:absolute; width:96px; animation:drift 22s ease-in-out infinite alternate}
+.m-sky .cloud svg{width:100%; display:block}
+.grass{position:relative; background:var(--grass); padding:20px 10px 14px; margin-top:-22px; border-radius:30px 30px 0 0 / 26px 26px 0 0}
+@media (min-width:560px){.grass{padding:24px 14px 18px}}
+.turtle-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:6px}
+@media (max-width:360px){.turtle-grid{gap:4px}.grass{padding:18px 8px 12px}}
+@media (min-width:640px){.turtle-grid{grid-template-columns:repeat(11,1fr)}}
+.turtle{position:relative; aspect-ratio:1/.95; min-width:0; padding:3px; border:2px dashed rgba(107,81,67,.42); border-radius:14px; background:rgba(255,255,255,.55);
+  cursor:pointer; display:grid; place-items:center; transition:transform .6s ease, background .3s, border-color .3s;
+  transform:translate(var(--dx,0px),var(--dy,0px)) rotate(var(--rot,0deg)); -webkit-tap-highlight-color:transparent}
+.turtle svg{width:100%; display:block; transform-origin:50% 100%; transition:filter .3s, opacity .3s}
+.turtle.pending svg{filter:grayscale(1); opacity:.42}
+.turtle.done{border-style:solid; border-color:var(--sage); background:#fff}
+.turtle .badge{position:absolute; top:-6px; right:-6px; min-width:20px; height:20px; padding:0 3px; border-radius:10px; background:#fff; border:2px solid var(--sage);
+  font-size:12px; line-height:16px; font-weight:800; color:var(--ink); text-align:center; pointer-events:none}
+.turtle.done .badge{background:var(--sage)}
+.turtle.special.done{border-color:var(--honey); background:#FFF3D6; box-shadow:0 0 0 2px rgba(246,215,122,.9)}
+.turtle.special.done::after{content:"★"; position:absolute; left:3px; top:-1px; font-size:12px; line-height:1; color:#C28A10; pointer-events:none}
+.turtle.hop svg{animation:hop .55s ease}
+.turtle.arrive svg{animation:arrive .7s cubic-bezier(.3,1.4,.5,1) both}
+.turtle.cheer svg{animation:hop .7s ease var(--cd,0s) 2}
+.turtle.wiggle svg{animation:wiggle .4s ease}
+@keyframes hop{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-13px) scale(1.07,.96)}55%{transform:translateY(0) scale(.95,1.05)}100%{transform:translateY(0) scale(1)}}
+@keyframes arrive{0%{transform:translateY(42%) scale(.5); opacity:0}55%{transform:translateY(-14%) scale(1.1,.95); opacity:1}80%{transform:translateY(2%) scale(.97,1.03)}100%{transform:none; opacity:1}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}30%{transform:rotate(-6deg)}70%{transform:rotate(6deg)}}
+
+/* 心願（第四階段） */
+.info{display:grid; grid-template-columns:1fr 1fr; gap:12px 18px; margin:0}
+@media (max-width:560px){.info{grid-template-columns:1fr}}
+.info dt{font-size:.9rem; color:var(--muted); font-weight:800}
+.info dd{margin:0; font-size:1.1rem; font-weight:700; color:var(--ink); word-break:break-word}
+.counter-row{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap}
+.preview-card{max-height:62vh; max-height:62dvh; overflow:auto; border-radius:18px; border:3px solid var(--caramel); background:var(--cream)}
+.preview-card svg{display:block; width:100%; height:auto}
+
+/* 祈願儀式（第五階段）：Canvas 燃燒 */
+.soft-note{text-align:center; font-weight:700; background:#EAF6FB; border-radius:16px; padding:10px 14px; margin:0 auto 14px; max-width:640px}
+.ritual-scene{position:relative; height:clamp(520px,80vh,680px); height:clamp(520px,80dvh,680px); border-radius:26px; overflow:hidden; border:3px solid #fff; box-shadow:var(--shadow); background:#CFE5EE; isolation:isolate; touch-action:pan-y}
+@media (orientation:landscape) and (max-height:520px){.ritual-scene{height:440px}}
+.r-sky{position:absolute; inset:0 0 24% 0; background:linear-gradient(180deg,#C9E1EC,#EAF5F7); z-index:0}
+.r-dawn{position:absolute; inset:0; background:radial-gradient(circle at 50% 12%,#FFF2B8,rgba(255,242,184,.4) 60%,rgba(255,242,184,0)); opacity:0; transition:opacity 7s ease; z-index:1; pointer-events:none}
+.ritual-on .r-dawn{opacity:1}
+.r-cloud{position:absolute; width:110px; animation:drift 24s ease-in-out infinite alternate; z-index:1}
+.r-cloud svg{width:100%; display:block}
+.r-sun{position:absolute; left:50%; top:9%; width:84px; height:84px; transform:translate(-50%,-50%); z-index:2; transition:transform 6s ease}
+.r-sun::before{content:""; position:absolute; inset:-60%; border-radius:50%; background:radial-gradient(circle,rgba(246,215,122,.8),rgba(246,215,122,0) 66%); opacity:0; transition:opacity 6s ease}
+.r-sun svg{position:relative; width:100%; height:100%; display:block; animation:pulseSmall 4.5s ease-in-out infinite}
+.ritual-on .r-sun{transform:translate(-50%,-50%) scale(1.5)}
+.ritual-on .r-sun::before{opacity:1}
+.r-grass{position:absolute; left:0; right:0; bottom:0; height:25%; background:var(--grass); border-radius:50% 50% 0 0 / 28px 28px 0 0; z-index:3}
+.r-turtle{position:absolute; width:16%; min-width:58px; bottom:var(--b); left:var(--l); z-index:4; transform:translate(var(--tx,0px),var(--ty,0px))}
+.walk .r-turtle{transition:transform 3.8s ease-in-out}
+.r-turtle svg{width:100%; display:block}
+.r-firelight{position:absolute; left:-20%; right:-20%; top:40%; height:70%; z-index:5; pointer-events:none; opacity:0;
+  background:radial-gradient(ellipse at 50% 55%,rgba(252,181,59,.62),rgba(250,140,50,.26) 40%,rgba(250,140,50,0) 70%)}
+.r-paper-box{position:absolute; left:50%; top:21%; height:70%; aspect-ratio:var(--ar,900 / 1700); transform:translateX(-50%); z-index:6; max-width:92%}
+.r-paper-box.pre{filter:drop-shadow(0 8px 8px rgba(60,35,20,.4))}
+.r-paper-box.appear{animation:paperAppear .9s ease both}
+@keyframes paperAppear{0%{transform:translateX(-50%) translateY(0) scale(1)}45%{transform:translateX(-50%) translateY(-8px) scale(1.03)}100%{transform:translateX(-50%) translateY(0) scale(1)}}
+.r-paper-canvas,.r-paper-fallback{position:absolute; inset:0; width:100%; height:100%; display:block}
+.r-paper-fallback svg{width:100%; height:100%; display:block; border-radius:6px}
+.r-paper-box.fb-burn .r-paper-fallback{transition:filter 4.6s ease-in, opacity 1.4s ease 4s; filter:sepia(1) brightness(.3) contrast(1.3); opacity:0}
+.r-fx{position:absolute; inset:0; width:100%; height:100%; z-index:8; pointer-events:none}
+.verse{text-align:center; margin-top:16px; line-height:2; font-size:1.05rem}
+.verse p+p{margin-top:8px}
+.status{text-align:center; font-weight:800; color:var(--ink); min-height:1.7em; margin-top:6px}
+.done-panel{text-align:center; margin-top:10px; padding:16px; background:#FFF3D6; border:3px solid var(--honey); border-radius:22px; animation:bannerIn .7s cubic-bezier(.3,1.5,.5,1)}
+.done-panel p{font-weight:800; font-size:1.15rem; color:var(--ink)}
+
+/* 祝福卡（第六階段） */
+.card-frame{max-width:460px; margin:0 auto; border-radius:28px; overflow:hidden; box-shadow:0 12px 32px rgba(107,81,67,.18); background:#FFF9F0; animation:bannerIn .8s ease}
+.card-frame svg{display:block; width:100%; height:auto}
+.disclaimer{max-width:640px; margin:22px auto 0; background:#fff; border:2px dashed var(--sage); border-radius:18px; padding:14px 16px; font-size:.95rem; line-height:1.8}
+
+/* 彈出視窗、提示、特效 */
+.modal-backdrop{position:fixed; inset:0; z-index:100; background:rgba(74,52,40,.45); display:flex; align-items:center; justify-content:center;
+  padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); animation:stageIn .25s ease}
+.modal{background:#fff; border-radius:26px; padding:22px; width:100%; max-width:520px; max-height:90vh; max-height:90dvh; overflow:auto; box-shadow:0 20px 50px rgba(74,52,40,.3)}
+.modal.wide{max-width:580px}
+.modal:focus{outline:none}
+.modal h2{font-size:1.35rem; margin-bottom:10px}
+.modal p+p{margin-top:10px}
+.modal .modal-note{font-size:.95rem; background:var(--cream); border-radius:14px; padding:10px 12px; margin-top:12px; border:2px dashed var(--sage)}
+.modal img{max-width:100%; height:auto; border-radius:14px}
+.toast{position:fixed; left:50%; bottom:calc(22px + env(safe-area-inset-bottom)); transform:translate(-50%,20px); background:var(--ink); color:#fff; padding:12px 18px; border-radius:16px; max-width:min(92vw,460px);
+  font-weight:700; z-index:120; opacity:0; pointer-events:none; transition:opacity .3s, transform .3s; text-align:center}
+.toast.show{opacity:1; transform:translate(-50%,0)}
+.fx-layer{position:fixed; inset:0; pointer-events:none; z-index:60; overflow:hidden}
+.fx{position:absolute; line-height:1; will-change:transform,opacity; animation:fxPop .95s ease-out forwards}
+.fx.p{color:#EFA0B0}.fx.h{color:#EE8A9B}.fx.s{color:#EDBB3E}
+.fx.fall{top:0; animation:fxFall var(--dur,3.4s) ease-in var(--dl,0s) forwards; opacity:0}
+@keyframes fxPop{0%{opacity:0; transform:translate(0,0) scale(.4)}15%{opacity:1}100%{opacity:0; transform:translate(var(--dx),var(--dy)) scale(1.1) rotate(var(--rot,0deg))}}
+@keyframes fxFall{0%{opacity:0; transform:translate(0,-30px) rotate(0)}10%{opacity:1}100%{opacity:0; transform:translate(var(--dx),105vh) rotate(var(--rot,200deg))}}
+.petals{position:fixed; inset:0; pointer-events:none; z-index:1; overflow:hidden}
+.petals span{position:absolute; top:-24px; left:var(--l); width:12px; height:16px; background:var(--blossom,#F3D4D0); border-radius:80% 0 80% 0; opacity:.85; animation:petalFall var(--d) linear infinite; animation-delay:var(--dl)}
+@keyframes petalFall{0%{transform:translate(0,-5vh) rotate(0)}50%{transform:translate(40px,55vh) rotate(180deg)}100%{transform:translate(-20px,108vh) rotate(360deg)}}
+
+/* 減少動態效果 */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; animation-delay:0s !important; transition-duration:.001ms !important; scroll-behavior:auto !important}
+  .petals,.fx-layer{display:none}
+}
+
+/* 揮手時的前肢可超出 viewBox，避免被裁切 */
+svg[data-aim]{overflow:visible}
+
+/* 橫向手機（高度很矮）：頂部進度列改為隨頁面捲動，避免遮住按鈕；首頁插畫縮小 */
+@media (max-height:520px){
+  .topbar{position:static}
+  .hero{aspect-ratio:16/7; max-width:620px}
+}
+
+/* 3.0：焚燒完成提示框（沿用通用彈窗，加上繪本風裝飾） */
+.modal.celebrate{border:4px solid var(--honey); background:linear-gradient(180deg,#FFF3D6 0,#fff 130px); text-align:center;
+  box-shadow:0 20px 50px rgba(74,52,40,.3); padding:20px 20px calc(20px + env(safe-area-inset-bottom)) }
+.modal.celebrate h2{color:var(--ink); font-size:clamp(1.3rem,5.4vw,1.6rem); margin:2px 0 12px}
+.modal.celebrate p{font-size:1.05rem; line-height:1.85; font-weight:600; color:var(--ink); text-align:left}
+.modal.celebrate .btn-row{margin-top:18px}
+.cel-art{display:flex; justify-content:center; align-items:center; height:112px; margin:0 0 8px}
+.cel-sun{width:96px}
+.cel-sun svg{display:block; width:100%; animation:pulseSmall 4.5s ease-in-out infinite}
+
+/* 署名 */
+.credit{text-align:center; margin-top:14px; font-size:.9rem; color:var(--muted); font-weight:700; letter-spacing:.03em}
+
+</style>
+</head>
+<body>
+<noscript><p style="padding:24px;text-align:center">這個小遊戲需要啟用 JavaScript 才能遊玩，請在瀏覽器中開啟 JavaScript 後重新整理頁面。</p></noscript>
+<div class="petals" id="petals" aria-hidden="true"></div>
+<div class="fx-layer" id="fx" aria-hidden="true"></div>
+
+<div class="app">
+  <!-- 頂部進度 -->
+  <header class="topbar" id="topbar" hidden>
+    <div class="topbar-row"><span class="brand">晴天烏龜祈願所</span><span class="step-text" id="stepText"></span></div>
+    <div class="progress-track" id="mainProgress" role="progressbar" aria-label="遊戲進度" aria-valuemin="1" aria-valuemax="6" aria-valuenow="1"><div class="progress-fill" id="mainProgressFill"></div></div>
+    <ol class="steps" id="steps"></ol>
+  </header>
+
+  <main id="main">
+    <!-- ===== 首頁 ===== -->
+    <section class="stage active" id="stage-home" aria-labelledby="homeTitle">
+      <div class="home-head">
+        <h1 id="homeTitle" tabindex="-1">晴天烏龜祈願所</h1>
+        <p class="subtitle">畫一顆太陽，陪小烏龜一起迎接好天氣。</p>
+      </div>
+      <div class="hero" id="hero" role="img" aria-label="春日花園插畫：微笑的太陽、飄動的白雲、草地與小花，還有四隻可愛的小烏龜"></div>
+      <div class="btn-row">
+        <button type="button" class="btn secondary big" id="btnIntro">認識祈晴習俗</button>
+        <button type="button" class="btn primary big" id="btnStart">開始祈晴之旅</button>
+      </div>
+      <p class="note">以臺灣民間祈晴習俗為靈感，帶你體驗春日祈願。遊戲內容僅供文化體驗與娛樂，不具天氣預測或改變天氣的功能。</p>
+      <p class="credit">Made with 🐢 by Peggy Lin</p>
+    </section>
+
+    <!-- ===== 第一階段：春日準備 ===== -->
+    <section class="stage" id="stage-1" aria-labelledby="t1">
+      <div class="stage-head"><h2 id="t1" tabindex="-1">今天，你想為哪一天祈晴呢？</h2><p class="hint">先選擇你希望放晴的日子。</p></div>
+      <form class="card" id="form1" novalidate>
+        <div class="field">
+          <label for="fDate">祈願日期（必填）</label>
+          <input type="date" id="fDate" required aria-describedby="eDate">
+          <p class="err" id="eDate" role="alert"></p>
+        </div>
+        <div class="field">
+          <label for="fPlace">祈願地點（必填）</label>
+          <input type="text" id="fPlace" maxlength="40" autocomplete="off" placeholder="例如：宜蘭礁溪、陽明山、淡水漁人碼頭" aria-describedby="ePlace">
+          <p class="err" id="ePlace" role="alert"></p>
+        </div>
+        <div class="field-row">
+          <div class="field" style="margin-bottom:0">
+            <label for="fStart">希望天氣穩定的開始時間</label>
+            <input type="time" id="fStart" value="09:00" required aria-describedby="eTime">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label for="fEnd">希望天氣穩定的結束時間</label>
+            <input type="time" id="fEnd" value="17:00" required aria-describedby="eTime">
+          </div>
+        </div>
+        <p class="err" id="eTime" role="alert" style="margin-bottom:12px"></p>
+        <div class="field" style="margin-top:16px">
+          <label for="fType">活動類型</label>
+          <select id="fType" required aria-describedby="eType"></select>
+          <p class="err" id="eType" role="alert"></p>
+        </div>
+        <div class="field" id="fTypeOtherWrap" hidden>
+          <label for="fTypeOther">請寫下你的活動內容</label>
+          <input type="text" id="fTypeOther" maxlength="20" autocomplete="off" placeholder="例如：露營、生日派對、運動會" aria-describedby="eTypeOther">
+          <p class="err" id="eTypeOther" role="alert"></p>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn secondary" id="btn1Back">返回首頁</button>
+          <button type="submit" class="btn primary">準備好了，開始畫太陽</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ===== 第二階段：畫出春日太陽 ===== -->
+    <section class="stage" id="stage-2" aria-labelledby="t2">
+      <div class="stage-head"><h2 id="t2" tabindex="-1">先為天空畫上一顆太陽吧！</h2><p class="hint">先選一種太陽，再點擊畫布放上去；放好後可以拖曳（或用方向鍵）微調位置。</p></div>
+      <div class="sun-picker" id="sunPicker" role="radiogroup" aria-label="選擇太陽圖案"></div>
+      <div class="paper-wrap" id="paperWrap">
+        <div class="paper" id="paper" tabindex="0" role="group" aria-label="畫紙。點擊或按 Enter 放上太陽，放好後可拖曳或用方向鍵移動">
+          <div class="paper-empty" id="paperEmpty">點一下畫紙，放上你的太陽</div>
+          <div class="sun-piece" id="sunPiece" role="img" aria-label="已放上的太陽，可以拖曳調整位置" hidden></div>
+        </div>
+      </div>
+      <p class="success" id="msg2" role="status"></p>
+      <div class="btn-row">
+        <button type="button" class="btn secondary" id="btn2Back">返回上一步</button>
+        <button type="button" class="btn secondary" id="btn2Redraw">重新繪製</button>
+        <button type="button" class="btn primary" id="btn2Next" disabled>邀請小烏龜</button>
+      </div>
+    </section>
+
+    <!-- ===== 第三階段：66 隻烏龜大集合 ===== -->
+    <section class="stage" id="stage-3" aria-labelledby="t3">
+      <div class="stage-head"><h2 id="t3" tabindex="-1">讓 66 隻小烏龜陪你一起迎接晴天！</h2><p class="hint">點擊尚未完成的小烏龜，讓牠們一隻一隻到齊；想快一點，也可以一次呼叫全部。</p></div>
+      <div class="counter">
+        <div class="counter-top">
+          <span class="count-text" id="countText" role="status">已完成 0／66 隻</span>
+          <span class="count-sub" id="countSub"></span>
+        </div>
+        <div class="bar" id="turtleBar" role="progressbar" aria-label="烏龜完成進度" aria-valuemin="0" aria-valuemax="66" aria-valuenow="0"><div class="bar-fill" id="turtleBarFill"></div></div>
+        <p class="special-sub" id="specialSub"></p>
+      </div>
+      <div class="banner" id="banner" role="status" hidden>哇！66 隻小烏龜集合完成！</div>
+      <div class="call-cards">
+        <div class="call-card">
+          <h3>一隻隻呼叫</h3>
+          <p class="call-desc">每按一次，就有一隻小烏龜走進草地；也可以直接點草地上的空位。</p>
+          <p class="call-note">一隻隻呼叫，心誠則靈。</p>
+          <button type="button" class="btn primary" id="btnCallOne">呼叫一隻小烏龜</button>
+        </div>
+        <div class="call-card">
+          <h3>一次呼叫全部</h3>
+          <p class="call-desc" id="callAllDesc">一次召集完整的 66 隻小烏龜，想快速完成時使用。</p>
+          <button type="button" class="btn accent" id="btnCallAll">一次呼叫全部小烏龜</button>
+        </div>
+      </div>
+      <p class="call-status" id="callStatus" role="status"></p>
+      <div class="tools">
+        <button type="button" class="btn secondary" id="btnAuto">自動排列</button>
+        <button type="button" class="btn secondary" id="btnWalk">小烏龜散步</button>
+        <button type="button" class="btn secondary" id="btnTurtleReset">重新開始</button>
+      </div>
+      <div class="meadow">
+        <div class="m-sky" id="mSky"></div>
+        <div class="grass"><div class="turtle-grid" id="turtleGrid" role="group" aria-label="66 隻小烏龜"></div></div>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn secondary" id="btn3Back">返回上一步</button>
+        <button type="button" class="btn primary" id="btn3Next" disabled>寫下我的晴天心願</button>
+      </div>
+    </section>
+
+    <!-- ===== 第四階段：寫下晴天心願 ===== -->
+    <section class="stage" id="stage-4" aria-labelledby="t4">
+      <div class="stage-head"><h2 id="t4" tabindex="-1">把你的小小心願，寫進春日裡。</h2><p class="hint">寫下你希望實現的心願，也可以直接使用預設祈願詞。</p></div>
+      <div class="card">
+        <dl class="info">
+          <div><dt>祈願日期</dt><dd id="sDate"></dd></div>
+          <div><dt>祈願地點</dt><dd id="sPlace"></dd></div>
+          <div><dt>希望天氣穩定的時段</dt><dd id="sTime"></dd></div>
+          <div><dt>活動類型</dt><dd id="sType"></dd></div>
+        </dl>
+      </div>
+      <div class="card">
+        <div class="field" style="margin-bottom:0">
+          <label for="wish">祈願文字（建議 200 字以內）</label>
+          <textarea id="wish" maxlength="200" rows="6"></textarea>
+          <div class="counter-row"><span id="wishCount" aria-live="polite">0／200 字</span><button type="button" class="link-btn" id="btnWishReset">恢復預設祈願詞</button></div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn secondary" id="btn4Back">返回上一步</button>
+        <button type="button" class="btn primary" id="btn4Confirm">確認我的心願</button>
+      </div>
+    </section>
+
+    <!-- ===== 第五階段：春日祈願儀式 ===== -->
+    <section class="stage" id="stage-5" aria-labelledby="t5">
+      <div class="stage-head"><h2 id="t5" tabindex="-1">深呼吸，為自己許下一個心願。</h2><p class="hint">準備好後，開始你的春日祈願。</p></div>
+      <p class="soft-note">這是遊戲內的數位象徵動畫，不需要列印，也不會真的燃燒任何東西。</p>
+      <div class="ritual-scene" id="ritualScene">
+        <div class="r-sky" id="rSky"></div>
+        <div class="r-dawn"></div>
+        <div class="r-sun" id="rSun"></div>
+        <div class="r-grass"></div>
+        <div id="rTurtles"></div>
+        <div class="r-firelight" id="rFire"></div>
+        <div class="r-paper-box pre" id="rPaperBox" role="img" aria-label="你完成的祈晴圖紙">
+          <div class="r-paper-fallback" id="rPaperFallback"></div>
+          <canvas class="r-paper-canvas" id="rPaperCanvas" hidden></canvas>
+        </div>
+        <canvas class="r-fx" id="rFx" aria-hidden="true"></canvas>
+      </div>
+      <div class="card verse" id="verse"></div>
+      <p class="status" id="ritualStatus" role="status"></p>
+      <div class="btn-row" id="rBtns">
+        <button type="button" class="btn secondary" id="btn5Back">返回修改心願</button>
+        <button type="button" class="btn accent" id="btnRitual">開始祈願</button>
+      </div>
+      <div class="done-panel" id="rDone" hidden>
+        <p>心願已經寫下，接下來一起迎接好天氣吧！</p>
+        <div class="btn-row" style="margin-top:12px"><button type="button" class="btn primary big" id="btnFinish">完成祈願</button></div>
+      </div>
+    </section>
+
+    <!-- ===== 第六階段：晴天祝福卡 ===== -->
+    <section class="stage" id="stage-6" aria-labelledby="t6">
+      <div class="stage-head"><h2 id="t6" tabindex="-1">你的春日祈願完成了！</h2><p class="hint">這張祝福卡是你親手完成的，可以下載保存。</p></div>
+      <div class="card-frame" id="cardHost"></div>
+      <div class="btn-row">
+        <button type="button" class="btn secondary" id="btn6Home">返回首頁</button>
+        <button type="button" class="btn secondary" id="btn6Restart">重新開始</button>
+        <button type="button" class="btn primary" id="btn6Download">下載祈晴祝福卡</button>
+      </div>
+      <p class="disclaimer">民俗文化體驗｜本遊戲以臺灣民間祈晴習俗為靈感，僅供文化體驗與娛樂，不代表宗教儀式或天氣預測。祈願屬於民俗信仰，並無科學證據證明能改變天氣；實際天氣請以氣象預報為準。</p>
+    </section>
+  </main>
+</div>
+
+<!-- 通用彈出視窗 -->
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
+    <h2 id="modalTitle"></h2>
+    <div id="modalBody"></div>
+    <div class="btn-row" id="modalActions"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   1. 常數與狀態
+   ========================================================= */
+var TOTAL = 66;
+var DEFAULT_WISH = '希望在這個特別的日子裡，天空晴朗、陽光溫暖、風雨平穩，讓原定的活動順利進行。願所有參與的人都平安健康，帶著愉快的心情留下美好回憶。';
+var RITUAL_VERSE = [
+  '願這一天，天空晴朗，微風和煦。',
+  '願期待已久的活動順利進行，重要的人都平安健康。',
+  '願所有美好的期待，都能在這個特別的日子裡留下溫暖的回憶。',
+  '不論天氣如何，都願我們帶著從容與喜悅，迎接每一個當下。'
+];
+var TYPES = [
+  ['travel','旅行出遊'], ['wedding','婚禮或婚紗攝影'], ['graduation','畢業典禮'],
+  ['outdoor','戶外活動'], ['date','重要約會'], ['other','其他']
+];
+var BLESSINGS = {
+  travel:'願旅途一路順心，遇見陽光，也遇見美好。',
+  wedding:'願重要的日子留下美好回憶，幸福與溫暖常伴左右。',
+  graduation:'願努力的日子開花結果，迎向充滿希望的新旅程。',
+  outdoor:'願準備的心意被好好珍惜，活動平安順利。',
+  date:'願這一天充滿笑容，留下值得回味的美好時光。',
+  other:'願一切安排順心，帶著平靜與期待迎接美好的一天。'
+};
+var SUN_TYPES = [['round','圓形太陽'], ['smile','微笑太陽'], ['rays','光芒太陽']];
+var STEP_NAMES = ['春日準備','繪製太陽','烏龜大集合','寫下心願','誠心祈願','晴天祝福'];
+var FOOT_TEXT = '以臺灣民間祈晴習俗為靈感，僅供文化體驗與娛樂，不具天氣預測或改變天氣的功能。';
+var FONT = "'Chiron GoRound TC','PingFang TC','Microsoft JhengHei','Noto Sans TC','Noto Sans CJK TC','Heiti TC','WenQuanYi Micro Hei',sans-serif";
+var SHELLS = ['#E2C3A0','#E8CBA9','#DDBB94'];
+
+var state = {
+  date:'', place:'', start:'09:00', end:'17:00', type:'', typeOther:'',
+  sunType:'smile', sun:null,
+  turtles:new Array(TOTAL).fill(false), celebrated:false,
+  specials:{},          // 本輪特殊烏龜：{格子編號: 造型}，只在建立新一組烏龜時擲一次
+  wish:DEFAULT_WISH, stage:'home'
+};
+var lastCard = null;      // 最近一次產生的祝福卡（供下載）
+var submitted1 = false;   // 第一階段是否已嘗試送出（之後即時驗證）
+
+/* =========================================================
+   2. 小工具
+   ========================================================= */
+function $(s, r){ return (r||document).querySelector(s); }
+function $$(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); }
+function pad(n){ return String(n).padStart(2,'0'); }
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function clamp(v,a,b){ return Math.min(b, Math.max(a, v)); }
+function rand(a,b){ return a + Math.random()*(b-a); }
+function reduced(){ return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function fmtDate(str){
+  if(!str) return '';
+  var p=str.split('-').map(Number), dt=new Date(p[0],p[1]-1,p[2]);
+  return p[0]+'年'+p[1]+'月'+p[2]+'日（'+'日一二三四五六'.charAt(dt.getDay())+'）';
+}
+function typeLabel(v){
+  if(v==='other' && state.typeOther) return state.typeOther;   // 選「其他」時顯示玩家自己寫的活動內容
+  for(var i=0;i<TYPES.length;i++){ if(TYPES[i][0]===v) return TYPES[i][1]; } return ''; }
+
+var toastTimer = 0;
+/* 顯示短暫提示訊息 */
+function toast(msg){
+  var t=$('#toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(function(){ t.classList.remove('show'); }, 3400);
+}
+
+/* =========================================================
+   3. SVG 插畫：太陽、烏龜（頭部可朝向太陽）、特殊造型、雲、花
+   ========================================================= */
+/* 太陽內容（座標 -60～60），type: round | smile | rays */
+function sunInner(type){
+  var s='<circle r="56" fill="#F6D77A" opacity=".25"/>';
+  if(type==='rays'){
+    for(var i=0;i<12;i++){
+      var len=(i%2===0)?15:9;
+      s+='<g transform="rotate('+(i*30)+')"><line x1="0" y1="-37" x2="0" y2="'+(-37-len)+'" stroke="#F2C14E" stroke-width="6" stroke-linecap="round"/></g>';
+    }
+  }
+  s+='<circle r="30" fill="#F6D77A" stroke="#E7B94F" stroke-width="3"/>';
+  s+='<ellipse cx="-11" cy="-15" rx="8" ry="4" fill="#fff" opacity=".4" transform="rotate(-30 -11 -15)"/>';
+  if(type!=='round'){
+    s+='<ellipse cx="-10" cy="-3" rx="2.8" ry="3.4" fill="#6B5143"/><ellipse cx="10" cy="-3" rx="2.8" ry="3.4" fill="#6B5143"/>';
+    s+='<path d="M-9 8 Q0 17 9 8" fill="none" stroke="#6B5143" stroke-width="2.6" stroke-linecap="round"/>';
+    s+='<ellipse cx="-18" cy="6" rx="5" ry="3.2" fill="#F2B99B" opacity=".85"/><ellipse cx="18" cy="6" rx="5" ry="3.2" fill="#F2B99B" opacity=".85"/>';
+  }
+  return s;
+}
+function sunSVG(type, cls, label){
+  return '<svg class="'+(cls||'')+'" viewBox="-60 -60 120 120" '+(label?'role="img" aria-label="'+label+'"':'aria-hidden="true"')+' focusable="false">'+sunInner(type)+'</svg>';
+}
+
+/* ---- 烏龜（俯視：頭在上方，臉朝向觀眾；只旋轉「頭部群組」去看太陽） ----
+   3.0 美術：深綠粗描邊、六角龜殼（中央大六角＋六片外圍甲片）、底緣一圈小鱗片，
+   一般與特殊烏龜共用同一套結構；龜殼橢圓（cx50 cy62 rx34 ry30）與頭部樞紐 (50,44) 完全不變，點擊區域與朝向邏輯不受影響。
+   不使用 SVG id／漸層／clipPath（66 隻重複使用也不會互相干擾），層次全由疊色、描邊與高光堆出。 */
+var OUT='#1F5F2E', SK='#8BC151', SKL='#1F5F2E', SKD='#6BA83F', INK='#1B2B1E';
+var KINDS=[['gold','金色福龜'],['flower','花花龜'],['sakura','櫻花龜'],['leaf','葉子龜'],['star','星星龜'],['sun','太陽龜']];
+function kindName(k){ for(var i=0;i<KINDS.length;i++){ if(KINDS[i][0]===k) return KINDS[i][1]; } return ''; }
+function f1(n){ return (Math.round(n*10)/10).toString(); }
+function mixc(a,b,t){
+  var pa=[1,3,5].map(function(i){ return parseInt(a.substr(i,2),16); }), pb=[1,3,5].map(function(i){ return parseInt(b.substr(i,2),16); });
+  return '#'+pa.map(function(v,i){ var x=Math.round(v+(pb[i]-v)*t); return (x<16?'0':'')+x.toString(16); }).join('');
+}
+function starPath(cx,cy,r){
+  var p=[];
+  for(var i=0;i<10;i++){ var a=-Math.PI/2+i*Math.PI/5, rr=(i%2===0)?r:r*0.46; p.push(f1(cx+Math.cos(a)*rr)+' '+f1(cy+Math.sin(a)*rr)); }
+  return 'M'+p.join(' L')+'Z';
+}
+function flowerG(cx,cy,r,petal,center){
+  var s='';
+  for(var i=0;i<5;i++){ var a=i*72*Math.PI/180; s+='<circle cx="'+f1(cx+Math.sin(a)*r*1.05)+'" cy="'+f1(cy-Math.cos(a)*r*1.05)+'" r="'+f1(r*.82)+'" fill="'+petal+'" stroke="#A66B46" stroke-width=".5"/>'; }
+  return s+'<circle cx="'+f1(cx)+'" cy="'+f1(cy)+'" r="'+f1(r*.6)+'" fill="'+center+'"/>';
+}
+/* ---- 龜殼幾何（只算一次）：中央六角形 H、外圈 O、六片外圍甲片 ---- */
+var GEO=(function(){
+  var cx=50, cy=62, hx=12.5, hy=11, Rx=27, Ry=23.5, H=[], O=[], k, a, g={};
+  for(k=0;k<6;k++){ a=k*Math.PI/3; H.push([cx+hx*Math.cos(a), cy+hy*Math.sin(a)]); O.push([cx+Rx*Math.cos(a), cy+Ry*Math.sin(a)]); }
+  function pt(p){ return f1(p[0])+' '+f1(p[1]); }
+  g.facet=function(k){ var k2=(k+1)%6; return 'M'+pt(H[k])+'L'+pt(O[k])+'A'+Rx+' '+Ry+' 0 0 1 '+pt(O[k2])+'L'+pt(H[k2])+'Z'; };
+  g.hex='M'+H.map(pt).join('L')+'Z';
+  g.facetsA=[0,2,4].map(g.facet).join(''); g.facetsB=[1,3,5].map(g.facet).join('');
+  g.facetAng=function(k){ return k*60+30; };            // 甲片朝外的方向（度，SVG 座標，順時針）
+  g.facetMid=function(k){ var t=(k*60+30)*Math.PI/180; return [cx+19.6*Math.cos(t), cy+17.2*Math.sin(t)]; };
+  // 甲片內縮輪廓（做金色細紋用）：把甲片四個角往重心縮小
+  g.inset=function(k,s){
+    var k2=(k+1)%6, q=[H[k],O[k],O[k2],H[k2]], m=g.facetMid(k);
+    return 'M'+q.map(function(p){ return pt([m[0]+(p[0]-m[0])*s, m[1]+(p[1]-m[1])*s]); }).join('L')+'Z';
+  };
+  var rim=''; for(k=0;k<16;k++){ a=(k+.5)*Math.PI/8; rim+='M'+f1(cx+Rx*Math.cos(a))+' '+f1(cy+Ry*Math.sin(a))+'L'+f1(cx+34*Math.cos(a))+' '+f1(cy+30*Math.sin(a)); }
+  g.rim=rim; return g;
+})();
+/* 單片葉子（沿 -y 方向，含葉脈）：用於葉子龜 */
+function leafG2(x,y,rot,sc,fill,vein){
+  return '<g transform="translate('+f1(x)+' '+f1(y)+') rotate('+f1(rot)+') scale('+sc+')"><path d="M0 -10 C7 -6 7.5 5 0 10 C-7.5 5 -7 -6 0 -10Z" fill="'+fill+'" stroke="'+vein+'" stroke-width="1"/><path d="M0 -7.5 V9 M0 -2 L-3.6 -5 M0 2.5 L3.8 -.5 M0 -2 L3.6 -5 M0 2.5 L-3.8 -.5" fill="none" stroke="'+vein+'" stroke-width=".8" stroke-linecap="round"/></g>';
+}
+function sakuraG(cx,cy,sc,fill,line,ctr){
+  var p='';
+  for(var i=0;i<5;i++){ p+='<path transform="translate('+f1(cx)+' '+f1(cy)+') rotate('+(i*72)+') scale('+sc+')" d="M0 0 C-4.4 -2.6 -4.8 -8.8 -1.3 -10.2 L0 -8.4 L1.3 -10.2 C4.8 -8.8 4.4 -2.6 0 0Z" fill="'+fill+'" stroke="'+line+'" stroke-width=".6"/>'; }
+  return p+'<circle cx="'+f1(cx)+'" cy="'+f1(cy)+'" r="'+f1(1.5*sc)+'" fill="'+ctr+'"/>';
+}
+/* 多層花朵：外層大花瓣、內層小花瓣、花心 */
+function layerFlower(cx,cy,r,c1,c2,c3,line){
+  var s='', i, a;
+  for(i=0;i<6;i++){ a=i*60; s+='<ellipse cx="'+f1(cx)+'" cy="'+f1(cy-r*.78)+'" rx="'+f1(r*.5)+'" ry="'+f1(r*.78)+'" transform="rotate('+a+' '+f1(cx)+' '+f1(cy)+')" fill="'+c1+'" stroke="'+line+'" stroke-width=".7"/>'; }
+  for(i=0;i<6;i++){ a=i*60+30; s+='<ellipse cx="'+f1(cx)+'" cy="'+f1(cy-r*.46)+'" rx="'+f1(r*.3)+'" ry="'+f1(r*.5)+'" transform="rotate('+a+' '+f1(cx)+' '+f1(cy)+')" fill="'+c2+'" stroke="'+line+'" stroke-width=".5"/>'; }
+  return s+'<circle cx="'+f1(cx)+'" cy="'+f1(cy)+'" r="'+f1(r*.26)+'" fill="'+c3+'" stroke="'+line+'" stroke-width=".6"/>';
+}
+/* 六款特殊龜殼：配色（out=描邊、rim=底緣、a/b=外圍甲片兩色、hex=中央六角）＋裝飾 art */
+function shellStyle(kind, base){
+  var star4=function(cx,cy,r,fill){ return '<path d="M'+f1(cx)+' '+f1(cy-r)+'Q'+f1(cx+r*.16)+' '+f1(cy-r*.16)+' '+f1(cx+r)+' '+f1(cy)+'Q'+f1(cx+r*.16)+' '+f1(cy+r*.16)+' '+f1(cx)+' '+f1(cy+r)+'Q'+f1(cx-r*.16)+' '+f1(cy+r*.16)+' '+f1(cx-r)+' '+f1(cy)+'Q'+f1(cx-r*.16)+' '+f1(cy-r*.16)+' '+f1(cx)+' '+f1(cy-r)+'Z" fill="'+fill+'"/>'; };
+  var i, s, m, t;
+  if(kind==='gold'){
+    s='<ellipse cx="50" cy="62" rx="30.5" ry="26.7" fill="none" stroke="#FFF3B0" stroke-width="1.6" stroke-dasharray="1 3.4" stroke-linecap="round"/>';
+    for(i=0;i<6;i++) s+='<path d="'+GEO.inset(i,.6)+'" fill="none" stroke="#A8680C" stroke-width=".9" stroke-linejoin="round" opacity=".85"/>';
+    s+='<path d="M50 51 Q52.2 60 61 62 Q52.2 64 50 73 Q47.8 64 39 62 Q47.8 60 50 51Z" fill="#FFF6C8" stroke="#A8680C" stroke-width=".9" stroke-linejoin="round"/><circle cx="50" cy="62" r="2.6" fill="#F9B72E" stroke="#A8680C" stroke-width=".9"/>';
+    return {out:'#7A4A08', rim:'#D68A12', a:'#F7BE35', b:'#FFD966', hex:'#FFEFA8', art:s};
+  }
+  if(kind==='flower'){
+    s=layerFlower(50,62,10.2,'#F58FA9','#FFD3DC','#FFC93C','#C75A78');
+    var pos=[[1,'#FFFFFF','#F58FA9'],[3,'#FFE08A','#F2994A'],[5,'#FFFFFF','#F58FA9']];
+    pos.forEach(function(p){ m=GEO.facetMid(p[0]); s+=flowerG(m[0],m[1],3.4,p[1],p[2]); });
+    [0,2,4].forEach(function(k){ m=GEO.facetMid(k); s+=leafG2(m[0],m[1],GEO.facetAng(k)+90,.5,'#8CC96B','#3C7A3A'); });
+    return {out:'#2E6B34', rim:'#E58F77', a:'#FFD9C0', b:'#FFE9D0', hex:'#FFF6DC', art:s};
+  }
+  if(kind==='sakura'){
+    s=sakuraG(50,62,1.35,'#FFC1D4','#B8456E','#FFE9A6');
+    for(i=0;i<6;i++){ m=GEO.facetMid(i); s+=(i%2===0)?sakuraG(m[0],m[1],.62,'#FFFFFF','#D5658A','#F9B6C8'):'<ellipse cx="'+f1(m[0])+'" cy="'+f1(m[1])+'" rx="2.8" ry="1.7" transform="rotate('+(GEO.facetAng(i)+40)+' '+f1(m[0])+' '+f1(m[1])+')" fill="#FFFFFF" opacity=".9"/>'; }
+    s+='<ellipse cx="50" cy="62" rx="30.5" ry="26.7" fill="none" stroke="#FFE0EA" stroke-width="1.3" stroke-dasharray="1.2 3.2" stroke-linecap="round"/>';
+    return {out:'#8E2F55', rim:'#D9668A', a:'#F6A5BD', b:'#FAC2D2', hex:'#FFE6EE', art:s};
+  }
+  if(kind==='leaf'){
+    s=leafG2(50,62,0,1.15,'#E3F6C8','#1E6B45');
+    for(i=0;i<6;i++){ m=GEO.facetMid(i); s+=leafG2(m[0],m[1],GEO.facetAng(i)+90,.62,(i%2?'#9ADB8E':'#C9ECA8'),'#1E6B45'); }
+    s+='<ellipse cx="50" cy="62" rx="30.5" ry="26.7" fill="none" stroke="#9FE0A8" stroke-width="1.2" stroke-dasharray="3 2.6" stroke-linecap="round"/>';
+    return {out:'#0F4A2E', rim:'#1E7A4C', a:'#2E9A62', b:'#58B97A', hex:'#D5F0B8', art:s};
+  }
+  if(kind==='star'){
+    s='<path d="'+starPath(50,62,10.5)+'" fill="#FFD84A" stroke="#B87A12" stroke-width="1.1" stroke-linejoin="round"/>';
+    for(i=0;i<6;i++){ m=GEO.facetMid(i); s+=(i%2===0)?'<path d="'+starPath(m[0],m[1],4.3)+'" fill="#FFE98A" stroke="#C98A12" stroke-width=".7" stroke-linejoin="round"/>':star4(m[0],m[1],4.2,'#FFFFFF'); }
+    s+='<ellipse cx="50" cy="62" rx="30.5" ry="26.7" fill="none" stroke="#C9D2FF" stroke-width="1.2" stroke-dasharray="1 3.4" stroke-linecap="round"/>';
+    return {out:'#1B2260', rim:'#2C3680', a:'#4455B8', b:'#5F6FD0', hex:'#8E9BF0', art:s};
+  }
+  if(kind==='sun'){
+    s='';
+    for(i=0;i<12;i++) s+='<line x1="50" y1="'+(62-9.6)+'" x2="50" y2="'+(62-(i%2?13.6:15.6))+'" transform="rotate('+(i*30)+' 50 62)" stroke="#FFF1B0" stroke-width="2.2" stroke-linecap="round"/>';
+    s+='<circle cx="50" cy="62" r="7.6" fill="#FFD84A" stroke="#A8480C" stroke-width="1.2"/><circle cx="47.6" cy="59.6" r="2.2" fill="#FFF6C8"/>';
+    for(i=0;i<6;i++){ m=GEO.facetMid(i); t=GEO.facetAng(i)+90; s+='<path transform="translate('+f1(m[0])+' '+f1(m[1])+') rotate('+t+')" d="M-3.6 3 Q0 -7 3.6 3 Q0 .6 -3.6 3Z" fill="'+(i%2?'#FFE08A':'#FFF1B0')+'" stroke="#A8480C" stroke-width=".7" stroke-linejoin="round"/>'; }
+    return {out:'#7A3208', rim:'#C85A12', a:'#F28A2A', b:'#FFB347', hex:'#FF9F32', art:s};
+  }
+  var b=base||'#6CB84E';
+  return {out:OUT, rim:mixc(b,'#000000',.2), a:b, b:mixc(b,'#FFFFFF',.2), hex:mixc(b,'#FFFFFF',.42),
+    art:'<circle cx="46.5" cy="58.6" r="1.7" fill="#fff" opacity=".6"/>'};
+}
+/* 龜殼：外圈底緣 → 底緣鱗片 → 六片甲片 → 中央六角 → 圖案 → 高光 */
+function shellSVG(kind, base){
+  var P=shellStyle(kind,base), o=P.out;
+  return '<ellipse cx="50" cy="62" rx="34" ry="30" fill="'+P.rim+'" stroke="'+o+'" stroke-width="3"/>'
+    +'<path d="'+GEO.rim+'" fill="none" stroke="'+o+'" stroke-width="1.4" stroke-linecap="round" opacity=".55"/>'
+    +'<ellipse cx="50" cy="62" rx="27" ry="23.5" fill="'+P.a+'" stroke="'+o+'" stroke-width="1.8"/>'
+    +'<path d="'+GEO.facetsA+'" fill="'+P.a+'" stroke="'+o+'" stroke-width="1.7" stroke-linejoin="round"/>'
+    +'<path d="'+GEO.facetsB+'" fill="'+P.b+'" stroke="'+o+'" stroke-width="1.7" stroke-linejoin="round"/>'
+    +'<path d="'+GEO.hex+'" fill="'+P.hex+'" stroke="'+o+'" stroke-width="1.9" stroke-linejoin="round"/>'
+    +P.art
+    +'<ellipse cx="35" cy="46.5" rx="7.5" ry="3" transform="rotate(-30 35 46.5)" fill="#fff" opacity=".42"/><ellipse cx="64" cy="49" rx="2.4" ry="1.3" transform="rotate(30 64 49)" fill="#fff" opacity=".35"/>';
+}
+/* 烏龜內容（還原 1.0 造型：側面、面向右，viewBox 0 0 100 80）。
+   o={shell, kind, eye, fl, ha}：fl=true 時整隻左右翻面（太陽在左邊）；ha=頭部抬起角度（度，正值向上看）。
+   特殊烏龜沿用 3.0 的精緻龜殼圖案，縮放貼合 1.0 的龜殼橢圓；一般烏龜的身體與 1.0 完全相同。 */
+function turtleInner(o){
+  o=o||{};
+  var skin='#A9C7A0', line='#7FA277', shell=o.shell||'#E2C3A0';
+  var eyes=(o.eye==='happy')
+    ? '<path d="M75.5 44 q3.5 -4 7 0" fill="none" stroke="#6B5143" stroke-width="2" stroke-linecap="round"/><path d="M86.5 44 q3.5 -4 7 0" fill="none" stroke="#6B5143" stroke-width="2" stroke-linecap="round"/>'
+    : '<ellipse class="t-eye" cx="79" cy="43" rx="2.1" ry="2.7" fill="#6B5143"/><ellipse class="t-eye" cx="90" cy="43" rx="2.1" ry="2.7" fill="#6B5143"/>';
+  var body;
+  if(o.kind){
+    body='<g transform="translate(44 46) scale(1.03 .9) translate(-50 -62)">'+shellSVG(o.kind)+'</g>';
+  }else{
+    body='<ellipse cx="44" cy="46" rx="35" ry="27" fill="'+shell+'" stroke="#B58B64" stroke-width="2.5"/>'
+     +'<path d="M44 28 L58 36 L58 53 L44 61 L30 53 L30 36 Z" fill="#EDD7BB" stroke="#B58B64" stroke-width="2" stroke-linejoin="round"/>'
+     +'<path d="M44 28 V21 M58 36 L67 31 M58 53 L67 58 M44 61 V69 M30 53 L21 58 M30 36 L21 31" fill="none" stroke="#B58B64" stroke-width="2" stroke-linecap="round"/>';
+  }
+  var head='<g class="t-head" transform="rotate('+(-(o.ha||0))+' 70 50)">'
+    +'<ellipse cx="75" cy="50" rx="6" ry="7" fill="'+skin+'"/>'
+    +'<circle cx="84" cy="48" r="14" fill="'+skin+'" stroke="'+line+'" stroke-width="2.5"/>'
+    +eyes
+    +'<ellipse cx="75" cy="52" rx="3" ry="2" fill="#F3B7BE"/><ellipse cx="93" cy="52" rx="3" ry="2" fill="#F3B7BE"/>'
+    +'<path d="M80.5 53 q3.5 3.6 7 0" fill="none" stroke="#6B5143" stroke-width="1.8" stroke-linecap="round"/></g>';
+  return '<g class="t-flip"'+(o.fl?' transform="translate(100 0) scale(-1 1)"':'')+'>'
+   +'<ellipse cx="22" cy="68" rx="10" ry="7" fill="'+skin+'" stroke="'+line+'" stroke-width="2"/>'
+   +'<ellipse cx="62" cy="69" rx="10" ry="7" fill="'+skin+'" stroke="'+line+'" stroke-width="2"/>'
+   +'<path d="M13 55 q-9 0 -10 -7 q7 1 11 4z" fill="'+skin+'" stroke="'+line+'" stroke-width="2" stroke-linejoin="round"/>'
+   +body+head+'</g>';
+}
+/* DOM 用烏龜：data-aim 讓 aimAll() 之後依太陽位置轉動頭部 */
+function turtleSVG(o){
+  return '<svg viewBox="0 0 100 80" data-aim aria-hidden="true" focusable="false">'+turtleInner(o)+'</svg>';
+}
+/* 依「烏龜中心 → 太陽中心」的向量決定朝向：太陽在左邊就整隻左右翻面，頭部再依仰角抬起（-25°～45°），臉永遠朝向太陽 */
+function aimParams(dx,dy){
+  var el=Math.atan2(-dy, Math.max(Math.abs(dx),1))*180/Math.PI;
+  if(!isFinite(el)) el=0;
+  return {fl:dx<0, ha:clamp(el,-25,45)};
+}
+function aimSvg(svg,dx,dy){
+  var p=aimParams(dx,dy), g=svg.querySelector('.t-flip'), h=svg.querySelector('.t-head');
+  if(g){ if(p.fl) g.setAttribute('transform','translate(100 0) scale(-1 1)'); else g.removeAttribute('transform'); }
+  if(h) h.setAttribute('transform','rotate('+(-p.ha).toFixed(1)+' 70 50)');
+}
+/* 讓 root 內所有烏龜的頭部朝向 sunEl（縮放、旋轉裝置、太陽位置改變時重新呼叫） */
+function aimAll(root, sunEl){
+  if(!root || !sunEl) return;
+  var sr=sunEl.getBoundingClientRect();
+  if(!sr.width) return;
+  var sx=sr.left+sr.width/2, sy=sr.top+sr.height/2;
+  $$('svg[data-aim]', root).forEach(function(svg){
+    var r=svg.getBoundingClientRect();
+    if(!r.width) return;
+    aimSvg(svg, sx-(r.left+r.width/2), sy-(r.top+r.height/2));
+  });
+}
+function aimCurrent(){
+  if(state.stage==='home') aimAll($('#hero'), $('#hero .h-sun'));
+  else if(state.stage==='3') aimAll($('#turtleGrid'), $('#mSky .m-sun'));
+  else if(state.stage==='5') aimAll($('#rTurtles'), $('#rSun'));
+}
+function aimSoon(){ requestAnimationFrame(aimCurrent); }
+
+function cloudSVG(){
+  return '<svg viewBox="0 0 120 60" aria-hidden="true" focusable="false"><g fill="#fff"><ellipse cx="60" cy="42" rx="52" ry="15"/><circle cx="38" cy="32" r="18"/><circle cx="68" cy="26" r="22"/><circle cx="92" cy="35" r="14"/></g></svg>';
+}
+function flowerSVG(color){
+  var p='';
+  for(var i=0;i<5;i++){ var a=i*72*Math.PI/180; p+='<circle cx="'+(20+Math.sin(a)*8).toFixed(1)+'" cy="'+(16-Math.cos(a)*8).toFixed(1)+'" r="6" fill="'+color+'"/>'; }
+  return '<svg viewBox="0 0 40 52" aria-hidden="true" focusable="false"><path d="M20 24 V50" stroke="#7FA277" stroke-width="3" stroke-linecap="round"/><path d="M20 40 q-9 -1 -11 -8 q9 0 11 8z" fill="#A9C7A0"/>'+p+'<circle cx="20" cy="16" r="5" fill="#F6D77A"/></svg>';
+}
+
+/* =========================================================
+   4. 特效（花瓣、愛心、光點）
+   ========================================================= */
+function addFx(cls, glyph, size, css){
+  var layer=$('#fx');
+  if(layer.childElementCount>140) return;
+  var el=document.createElement('span');
+  el.className='fx '+cls; el.textContent=glyph; el.style.fontSize=size+'px';
+  for(var k in css){ el.style.setProperty(k, css[k]); }
+  if(css.left) el.style.left=css.left; if(css.top) el.style.top=css.top;
+  var gone=function(){ if(el.parentNode) el.parentNode.removeChild(el); };
+  el.addEventListener('animationend', gone);
+  setTimeout(gone, 6500);
+  layer.appendChild(el);
+}
+/* 從某個元素周圍迸出小花瓣／愛心／光點 */
+function burst(anchor, kind, n){
+  if(reduced()) return;
+  var cx=window.innerWidth/2, cy=window.innerHeight/2;
+  if(anchor){ var r=anchor.getBoundingClientRect(); cx=r.left+r.width/2; cy=r.top+r.height/2; }
+  var glyphs = kind==='heart' ? ['♥'] : kind==='spark' ? ['✦','✧'] : ['✿','❀'];
+  var cls = kind==='heart' ? 'h' : kind==='spark' ? 's' : 'p';
+  for(var i=0;i<n;i++){
+    var ang=rand(0,Math.PI*2), dist=rand(28,70);
+    addFx(cls, glyphs[i%glyphs.length], rand(13,22), {
+      left:cx+'px', top:cy+'px',
+      '--dx':(Math.cos(ang)*dist).toFixed(0)+'px', '--dy':(Math.sin(ang)*dist-18).toFixed(0)+'px', '--rot':rand(-90,90).toFixed(0)+'deg'
+    });
+  }
+}
+/* 整個畫面飄落花瓣與愛心（慶祝用） */
+function rain(n, withHearts){
+  if(reduced()) return;
+  for(var i=0;i<n;i++){
+    var heart = withHearts && i%3===0;
+    addFx('fall '+(heart?'h':'p'), heart?'♥':(i%2?'✿':'❀'), rand(15,24), {
+      left:rand(0,window.innerWidth).toFixed(0)+'px',
+      '--dx':rand(-90,90).toFixed(0)+'px', '--rot':rand(-240,240).toFixed(0)+'deg',
+      '--dur':rand(2.8,4.4).toFixed(2)+'s', '--dl':rand(0,1.3).toFixed(2)+'s'
+    });
+  }
+}
+
+/* =========================================================
+   5. 彈出視窗（含鍵盤焦點管理）
+   ========================================================= */
+var modalState = null;
+/* 開啟彈出視窗：actions=[{label,kind,onClick}]，按鈕按下後先關閉視窗再執行 onClick */
+function openModal(opt){
+  var backdrop=$('#modalBackdrop'), modal=$('#modal'), body=$('#modalBody'), acts=$('#modalActions');
+  if(modalState) closeModal(true);
+  $('#modalTitle').textContent=opt.title;
+  body.innerHTML=''; if(typeof opt.body==='string') body.innerHTML=opt.body; else if(opt.body) body.appendChild(opt.body);
+  acts.innerHTML='';
+  var first=null;
+  (opt.actions||[]).forEach(function(a){
+    var b=document.createElement('button'); b.type='button'; b.className='btn '+(a.kind||'secondary'); b.textContent=a.label;
+    b.addEventListener('click', function(){ closeModal(); if(a.onClick) a.onClick(); });
+    acts.appendChild(b); if(a.kind==='primary' && !first) first=b;
+  });
+  modal.classList.toggle('wide', !!opt.wide); modal.classList.toggle('celebrate', opt.cls==='celebrate');
+  modalState={prev:document.activeElement};
+  backdrop.hidden=false; document.body.classList.add('modal-open');
+  (first || modal).focus({preventScroll:true});
+}
+function closeModal(silent){
+  if(!modalState) return;
+  $('#modalBackdrop').hidden=true; document.body.classList.remove('modal-open');
+  var prev=modalState.prev; modalState=null;
+  if(!silent && prev && prev.focus) prev.focus({preventScroll:true});
+}
+/* 二次確認視窗 */
+function confirmBox(title, msg, okLabel, onOk){
+  openModal({title:title, body:'<p>'+esc(msg)+'</p>', actions:[
+    {label:'先不要', kind:'secondary'},
+    {label:okLabel, kind:'primary', onClick:onOk}
+  ]});
+}
+document.addEventListener('keydown', function(e){
+  if(!modalState) return;
+  if(e.key==='Escape'){ e.preventDefault(); closeModal(); return; }
+  if(e.key==='Tab'){
+    var f=$$('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])', $('#modal')).filter(function(x){ return !x.disabled && x.offsetParent!==null; });
+    if(!f.length){ e.preventDefault(); return; }
+    var a=f[0], z=f[f.length-1];
+    if(e.shiftKey && (document.activeElement===a || document.activeElement===$('#modal'))){ e.preventDefault(); z.focus(); }
+    else if(!e.shiftKey && document.activeElement===z){ e.preventDefault(); a.focus(); }
+  }
+});
+$('#modalBackdrop').addEventListener('mousedown', function(e){ if(e.target===this) closeModal(); });
+
+/* =========================================================
+   6. 階段切換與進度
+   ========================================================= */
+var busy = false;
+var STAGE_IDS = ['home','1','2','3','4','5','6'];
+
+/* 建立頂部步驟列 */
+function buildSteps(){
+  $('#steps').innerHTML = STEP_NAMES.map(function(n){ return '<li><span class="lbl">'+n+'</span></li>'; }).join('');
+}
+/* 更新進度條與步驟狀態 */
+function setProgress(n){
+  $('#mainProgressFill').style.width=(n/6*100)+'%';
+  $('#mainProgress').setAttribute('aria-valuenow', n);
+  $('#stepText').textContent='第 '+n+' 步／共 6 步：'+STEP_NAMES[n-1];
+  $$('#steps li').forEach(function(li,i){
+    li.classList.toggle('done', i<n-1);
+    if(i===n-1) li.setAttribute('aria-current','step'); else li.removeAttribute('aria-current');
+  });
+}
+/* 切換到指定階段（淡出再淡入） */
+function goTo(id){
+  if(busy || state.stage===id) return;
+  busy=true;
+  var cur=$('#stage-'+state.stage), next=$('#stage-'+id);
+  var prevId=state.stage;
+  if(prevId==='5') resetRitualView(true);
+  if(prevId==='3') settleCalling();
+  cur.classList.add('leaving');
+  setTimeout(function(){
+    cur.classList.remove('active','leaving');
+    next.classList.add('active');
+    state.stage=id;
+    var isGame = id!=='home';
+    $('#topbar').hidden=!isGame;
+    if(isGame) setProgress(Number(id));
+    document.body.classList.toggle('sunny', id==='6');
+    window.scrollTo(0,0);
+    onEnter(id);
+    var h=$('h1, h2', next); if(h) h.focus({preventScroll:true});
+    busy=false;
+  }, reduced()?0:220);
+}
+/* 進入某階段時要做的準備 */
+function onEnter(id){
+  if(id==='1'){ $('#fDate').min=todayStr(); }
+  if(id==='2'){ updateSunPiece(); updateStage2UI(); }
+  if(id==='3'){ buildMeadowSky(); refreshTurtles(); }
+  if(id==='4'){ fillSummary(); $('#wish').value=state.wish; updateWishCount(); }
+  if(id==='5'){ buildRitualScene(); }
+  if(id==='6'){ buildFinalCard(); rain(34,true); }
+  aimSoon();
+}
+
+/* =========================================================
+   7. 首頁
+   ========================================================= */
+/* 組合首頁春日花園插畫 */
+function buildHero(){
+  var h='';
+  h+='<div class="h-halo"></div>';
+  h+='<div class="h-sun">'+sunSVG('smile','')+'</div>';
+  h+='<div class="h-cloud" style="left:4%;top:8%;width:24%;animation-duration:19s">'+cloudSVG()+'</div>';
+  h+='<div class="h-cloud" style="left:62%;top:14%;width:28%;animation-duration:25s;animation-delay:-8s">'+cloudSVG()+'</div>';
+  h+='<div class="h-cloud" style="left:30%;top:2%;width:16%;animation-duration:31s;animation-delay:-14s;opacity:.85">'+cloudSVG()+'</div>';
+  h+='<div class="h-hill"><svg viewBox="0 0 400 200" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 70 Q100 18 200 58 T400 46 V200 H0Z" fill="#B9D4B0"/><path d="M0 112 Q120 72 240 106 T400 92 V200 H0Z" fill="#DCEBD3"/></svg></div>';
+  var flowers=[['5%','30%','#F3B7BE'],['14%','10%','#FFFFFF'],['88%','26%','#F2B99B'],['80%','6%','#F6D77A'],['47%','30%','#F3B7BE'],['66%','24%','#FFFFFF'],['26%','27%','#F6D77A']];
+  flowers.forEach(function(f,i){ h+='<div class="h-flower" style="left:'+f[0]+';bottom:'+f[1]+'"><div style="animation-delay:'+(-i*0.7)+'s">'+flowerSVG(f[2])+'</div></div>'; });
+  var turtles=[
+    {l:'7%',b:'10%',w:'19%',eye:'open'},
+    {l:'30%',b:'3%',w:'22%',eye:'happy'},
+    {l:'55%',b:'11%',w:'17%',eye:'open'},
+    {l:'74%',b:'2%',w:'21%',eye:'open'},
+    {l:'46%',b:'23%',w:'11%',eye:'happy'}
+  ];
+  turtles.forEach(function(t,i){
+    h+='<div class="hero-turtle" style="left:'+t.l+';bottom:'+t.b+';width:'+t.w+';--bd:'+(-i*1.3)+'s">'
+      +turtleSVG({eye:t.eye, shell:SHELLS[i%3]}).replace('<svg ','<svg style="animation-delay:'+(-i*0.8)+'s" ')+'</div>';
+  });
+  $('#hero').innerHTML=h;
+}
+/* 背景緩慢飄落的花瓣 */
+function buildPetals(){
+  var h='';
+  for(var i=0;i<10;i++){
+    h+='<span style="--l:'+rand(2,96).toFixed(0)+'%;--d:'+rand(16,28).toFixed(1)+'s;--dl:'+(-rand(0,26)).toFixed(1)+'s;transform:scale('+rand(.7,1.2).toFixed(2)+')"></span>';
+  }
+  $('#petals').innerHTML=h;
+}
+/* 民俗介紹彈窗 */
+function showIntro(){
+  openModal({
+    title:'認識祈晴習俗',
+    body:'<p>燒烏龜祈晴，是臺灣民間流傳的一種祈願習俗。人們透過繪製太陽與烏龜，寫下希望天氣晴朗的日期與地點，表達對美好天氣的期待。</p>'
+        +'<p>不同地區與流傳版本的做法可能有所不同。本遊戲採用太陽、66 隻烏龜與祈願文字的互動設計，帶領玩家體驗這項民俗的象徵意義。</p>'
+        +'<p class="modal-note">民俗文化體驗｜本遊戲以臺灣民間祈晴習俗為靈感，僅供文化體驗與娛樂，不代表宗教儀式或天氣預測。祈願屬於民俗信仰，並無科學證據證明能改變天氣；實際天氣請以氣象預報為準。</p>',
+    actions:[{label:'我知道了', kind:'primary'}]
+  });
+}
+
+/* =========================================================
+   8. 第一階段：表單與驗證
+   ========================================================= */
+var F = {};
+function initForm(){
+  F.date=$('#fDate'); F.place=$('#fPlace'); F.start=$('#fStart'); F.end=$('#fEnd'); F.type=$('#fType');
+  F.typeOther=$('#fTypeOther'); F.typeOtherWrap=$('#fTypeOtherWrap');
+  F.type.innerHTML='<option value="">請選擇活動類型</option>'+TYPES.map(function(t){ return '<option value="'+t[0]+'">'+t[1]+'</option>'; }).join('');
+  F.date.min=todayStr();
+  [F.date,F.place,F.start,F.end,F.type,F.typeOther].forEach(function(el){
+    var h=function(){ syncTypeOther(); saveStage1(); if(submitted1) validate1(true); };
+    el.addEventListener('input',h); el.addEventListener('change',h);
+  });
+  // 剛選到「其他」時，直接把游標移到輸入框
+  F.type.addEventListener('change', function(){ if(F.type.value==='other') F.typeOther.focus(); });
+  $('#form1').addEventListener('submit', function(e){
+    e.preventDefault(); submitted1=true;
+    var errs=validate1(true), order=['date','place','start','end','type','typeOther'];
+    for(var i=0;i<order.length;i++){
+      if(errs[order[i]]){ F[order[i]].focus(); return; }
+    }
+    saveStage1(); goTo('2');
+  });
+  $('#btn1Back').addEventListener('click', function(){ saveStage1(); goTo('home'); });
+}
+/* 只有活動類型選「其他」時，才顯示自訂活動內容的輸入框 */
+function syncTypeOther(){
+  F.typeOtherWrap.hidden = (F.type.value!=='other');
+}
+/* 把表單內容存進狀態 */
+function saveStage1(){
+  state.date=F.date.value; state.place=F.place.value.trim(); state.start=F.start.value; state.end=F.end.value; state.type=F.type.value;
+  state.typeOther = (F.type.value==='other') ? F.typeOther.value.trim() : '';
+}
+/* 驗證第一階段欄位，回傳錯誤物件 */
+function validate1(show){
+  var e={}, d=F.date.value, p=F.place.value.trim(), s=F.start.value, en=F.end.value, t=F.type.value;
+  if(!d) e.date='請先選擇你希望放晴的日期。';
+  else if(d<todayStr()) e.date='這個日期已經過去囉，請重新選擇今天或之後的日子。';
+  if(!p) e.place='請寫下想祈求放晴的地點，例如「宜蘭礁溪」。';
+  if(!s) e.start='請選擇天氣穩定的開始時間。';
+  if(!en) e.end='請選擇天氣穩定的結束時間。';
+  if(s && en && en<=s) e.end='結束時間需要晚於開始時間，請再調整一下。';
+  if(!t) e.type='請選擇活動類型。';
+  if(t==='other' && !F.typeOther.value.trim()) e.typeOther='請簡單寫下你的活動內容，例如「露營」。';
+  if(show){
+    $('#eDate').textContent=e.date||''; $('#ePlace').textContent=e.place||'';
+    $('#eTime').textContent=e.start||e.end||''; $('#eType').textContent=e.type||'';
+    $('#eTypeOther').textContent=e.typeOther||'';
+    F.typeOther.setAttribute('aria-invalid', e.typeOther?'true':'false');
+    F.date.setAttribute('aria-invalid', e.date?'true':'false');
+    F.place.setAttribute('aria-invalid', e.place?'true':'false');
+    F.start.setAttribute('aria-invalid', e.start?'true':'false');
+    F.end.setAttribute('aria-invalid', e.end?'true':'false');
+    F.type.setAttribute('aria-invalid', e.type?'true':'false');
+  }
+  return e;
+}
+
+/* =========================================================
+   9. 第二階段：繪製太陽
+   ========================================================= */
+var sunDrag = null;
+function initSun(){
+  var picker=$('#sunPicker');
+  picker.innerHTML=SUN_TYPES.map(function(t){
+    return '<button type="button" class="pick" role="radio" data-type="'+t[0]+'" aria-checked="'+(t[0]===state.sunType)+'" tabindex="'+(t[0]===state.sunType?0:-1)+'">'+sunSVG(t[0],'')+'<span>'+t[1]+'</span><span class="tick"></span></button>';
+  }).join('');
+  syncPicker();
+  picker.addEventListener('click', function(e){ var b=e.target.closest('.pick'); if(b) chooseSun(b.getAttribute('data-type')); });
+  picker.addEventListener('keydown', function(e){
+    if(e.key!=='ArrowRight' && e.key!=='ArrowLeft' && e.key!=='ArrowDown' && e.key!=='ArrowUp') return;
+    e.preventDefault();
+    var idx=SUN_TYPES.map(function(t){return t[0];}).indexOf(state.sunType);
+    idx=(idx+((e.key==='ArrowRight'||e.key==='ArrowDown')?1:-1)+SUN_TYPES.length)%SUN_TYPES.length;
+    chooseSun(SUN_TYPES[idx][0]); var b=$('.pick[data-type="'+SUN_TYPES[idx][0]+'"]', picker); if(b) b.focus();
+  });
+  var paper=$('#paper'), piece=$('#sunPiece');
+  paper.addEventListener('click', function(e){
+    if(e.target.closest('#sunPiece')) return;
+    var r=paper.getBoundingClientRect();
+    placeSun((e.clientX-r.left)/r.width*100, (e.clientY-r.top)/r.height*100);
+  });
+  paper.addEventListener('keydown', function(e){
+    if(e.target!==paper) return;
+    if((e.key==='Enter' || e.key===' ') && !state.sun){ e.preventDefault(); placeSun(50,50); return; }
+    var step=3, dx=0, dy=0;
+    if(e.key==='ArrowLeft') dx=-step; else if(e.key==='ArrowRight') dx=step; else if(e.key==='ArrowUp') dy=-step; else if(e.key==='ArrowDown') dy=step; else return;
+    e.preventDefault();
+    if(!state.sun){ placeSun(50,50); return; }
+    state.sun.x=clamp(state.sun.x+dx,17,83); state.sun.y=clamp(state.sun.y+dy,24,76); updateSunPiece();
+  });
+  piece.addEventListener('pointerdown', function(e){
+    if(!state.sun) return;
+    e.preventDefault();
+    var r=$('#paper').getBoundingClientRect();
+    sunDrag={dx:state.sun.x-(e.clientX-r.left)/r.width*100, dy:state.sun.y-(e.clientY-r.top)/r.height*100};
+    try{ piece.setPointerCapture(e.pointerId); }catch(err){}
+    piece.classList.add('dragging');
+  });
+  piece.addEventListener('pointermove', function(e){
+    if(!sunDrag) return;
+    var r=$('#paper').getBoundingClientRect();
+    state.sun.x=clamp((e.clientX-r.left)/r.width*100+sunDrag.dx,17,83);
+    state.sun.y=clamp((e.clientY-r.top)/r.height*100+sunDrag.dy,24,76);
+    updateSunPiece();
+  });
+  var endDrag=function(){ sunDrag=null; piece.classList.remove('dragging'); };
+  piece.addEventListener('pointerup', endDrag); piece.addEventListener('pointercancel', endDrag);
+  $('#btn2Back').addEventListener('click', function(){ goTo('1'); });
+  $('#btn2Redraw').addEventListener('click', function(){
+    state.sun=null; $('#paperWrap').classList.remove('bright'); $('#msg2').textContent='';
+    updateSunPiece(); updateStage2UI(); toast('畫紙已清空，重新放上一顆太陽吧！');
+  });
+  $('#btn2Next').addEventListener('click', function(){ if(state.sun) goTo('3'); });
+}
+function syncPicker(){
+  $$('#sunPicker .pick').forEach(function(b){
+    var on=b.getAttribute('data-type')===state.sunType;
+    b.setAttribute('aria-checked', on); b.tabIndex=on?0:-1; $('.tick',b).textContent=on?'✓ 已選擇':'';
+  });
+}
+function chooseSun(type){
+  state.sunType=type; syncPicker();
+  if(state.sun){ $('#sunPiece').innerHTML=sunSVG(state.sunType,''); }
+}
+/* 在畫紙上放置（或移動）太陽，座標為百分比 */
+function placeSun(x,y){
+  var first=!state.sun;
+  state.sun={x:clamp(x,17,83), y:clamp(y,24,76)};
+  if(first){
+    $('#sunPiece').innerHTML=sunSVG(state.sunType,'');
+    updateSunPiece(); updateStage2UI();
+    $('#paperWrap').classList.add('bright');
+    var p=$('#sunPiece'); p.classList.remove('pop'); void p.offsetWidth; p.classList.add('pop');
+    $('#msg2').textContent='太陽準備好了，接下來邀請小烏龜一起來玩吧！';
+    burst(p,'spark',9); burst(p,'petal',6);
+  } else { updateSunPiece(); }
+}
+function updateSunPiece(){
+  var p=$('#sunPiece');
+  if(!state.sun){ p.hidden=true; $('#paperEmpty').hidden=false; return; }
+  if(!p.firstChild) p.innerHTML=sunSVG(state.sunType,'');
+  p.hidden=false; $('#paperEmpty').hidden=true;
+  p.style.left=state.sun.x+'%'; p.style.top=state.sun.y+'%';
+  $('#paperWrap').classList.add('bright');
+  if(!$('#msg2').textContent) $('#msg2').textContent='太陽準備好了，接下來邀請小烏龜一起來玩吧！';
+}
+function updateStage2UI(){ $('#btn2Next').disabled=!state.sun; }
+
+/* =========================================================
+   10. 第三階段：66 隻烏龜（逐隻呼叫／一次呼叫全部／特殊烏龜）
+   ========================================================= */
+var calling = false;      // 「一次呼叫全部」動畫進行中
+var callTimers = [];      // 動畫計時器（離開、重設時一律清除）
+var dispCount = 0;        // 動畫期間顯示用的計數（真實計數 state.turtles 永遠一次到位）
+var turtleEls = [];       // 66 個烏龜按鈕（建立一次後快取）
+
+function shuffle(a){
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+/* 擲出本輪特殊烏龜：3～6 隻、位置從 66 格隨機抽取、造型各不相同。
+   只在「建立新一組烏龜」時呼叫（初始化、重設、重新開始）；結果存在 state.specials，重繪一律讀取，不再亂數。 */
+function rollSpecials(){
+  var n=3+Math.floor(Math.random()*4), idx=[], out={}, i;
+  var kinds=KINDS.map(function(k){ return k[0]; });
+  for(i=0;i<TOTAL;i++) idx.push(i);
+  shuffle(idx); shuffle(kinds);
+  for(i=0;i<n;i++) out[idx[i]]=kinds[i];
+  return out;
+}
+function turtleLabel(i,done){
+  var k=state.specials[i], nm=(done&&k)?'（'+kindName(k)+'）':'';
+  return '第 '+(i+1)+' 隻烏龜'+nm+'，'+(done?'已完成':'尚未完成，點擊完成');
+}
+/* 依 state.specials 建立 66 個烏龜按鈕（不綁事件；事件用委派在 initTurtles 綁一次） */
+function renderTurtleGrid(){
+  var h='';
+  for(var i=0;i<TOTAL;i++){
+    var k=state.specials[i]||'';
+    h+='<button type="button" class="turtle pending'+(k?' special':'')+'" data-i="'+i+'"'+(k?' data-kind="'+k+'"':'')+' aria-pressed="false" aria-label="'+turtleLabel(i,false)+'" style="--bd:'+(-(i%11)*0.45).toFixed(2)+'s">'
+      +'<span class="badge">'+(i+1)+'</span>'+turtleSVG({shell:SHELLS[i%3], kind:k, eye:(i%4===1?'happy':'open')})+'</button>';
+  }
+  $('#turtleGrid').innerHTML=h;
+  turtleEls=$$('#turtleGrid .turtle');
+}
+function setTurtleView(btn,done){
+  var i=Number(btn.getAttribute('data-i'));
+  btn.classList.toggle('done',done); btn.classList.toggle('pending',!done);
+  btn.setAttribute('aria-pressed',done);
+  btn.setAttribute('aria-label',turtleLabel(i,done));
+  $('.badge',btn).textContent=done?'✓':(i+1);
+}
+function countDone(){ return state.turtles.filter(Boolean).length; }
+function retrig(el,cls){
+  el.classList.remove('hop','wiggle','arrive'); void el.offsetWidth; el.classList.add(cls);
+  setTimeout(function(){ el.classList.remove(cls); }, 800);
+}
+/* 召集第 i 隻：這是唯一會把 state.turtles[i] 設為 true 的單隻入口（只有尚未完成時才會進來，不重複計數） */
+function summon(i){
+  var btn=turtleEls[i], k=state.specials[i];
+  state.turtles[i]=true;
+  setTurtleView(btn,true);
+  retrig(btn,'arrive');
+  if(k){ burst(btn,'spark',8); toast('哇，召喚到「'+kindName(k)+'」！'); }
+  else burst(btn, Math.random()<.5?'petal':'heart', 5);
+  updateCount();
+  if(countDone()===TOTAL && !state.celebrated) celebrate();
+}
+/* 點擊草地上的烏龜：未完成才召集；已完成只輕輕搖晃 */
+function tapTurtle(btn,i){
+  if(calling) return;
+  if(state.turtles[i]){ retrig(btn,'wiggle'); return; }
+  summon(i);
+}
+/* 功能 A：一隻隻呼叫（每次只新增一隻，依序挑第一個空位） */
+function callNext(){
+  if(calling) return;
+  for(var i=0;i<TOTAL;i++){
+    if(!state.turtles[i]){
+      summon(i);
+      var b=turtleEls[i];
+      if(b && b.scrollIntoView) b.scrollIntoView({block:'nearest', behavior:reduced()?'auto':'smooth'});
+      return;
+    }
+  }
+  toast('66 隻小烏龜已經全部到齊囉！');
+}
+function setCallStatus(msg){ $('#callStatus').textContent=msg; }
+/* 功能 B：一次呼叫全部。
+   已呼叫的會保留，只補齊「尚未出現」的；狀態一次到位（總數不可能超過 66），動畫只負責畫面呈現。 */
+function callAll(){
+  if(calling) return;
+  var left=[], i;
+  for(i=0;i<TOTAL;i++){ if(!state.turtles[i]) left.push(i); }
+  if(!left.length){ toast('66 隻小烏龜已經全部到齊囉！'); return; }
+  var had=TOTAL-left.length;
+  setCallStatus(had>0 ? '已保留你呼叫的 '+had+' 隻，其餘 '+left.length+' 隻一起趕來囉！' : '66 隻小烏龜正在趕來集合……');
+  calling=true; dispCount=had;
+  left.forEach(function(j){ state.turtles[j]=true; });
+  var step=reduced()?6:Math.max(14, Math.min(48, Math.floor(1700/left.length)));
+  left.forEach(function(j,k){
+    callTimers.push(setTimeout(function(){
+      var b=turtleEls[j]; setTurtleView(b,true); retrig(b,'arrive');
+      dispCount++; renderCount(dispCount);
+    }, k*step));
+  });
+  callTimers.push(setTimeout(finishCalling, left.length*step+700));
+  updateCount();
+}
+function clearCallTimers(){ callTimers.forEach(clearTimeout); callTimers=[]; }
+/* 一次呼叫結束（或離開此階段時提前結算）：同步所有外觀、解除鎖定 */
+function finishCalling(quiet){
+  var was=calling;
+  clearCallTimers(); calling=false; dispCount=countDone();
+  refreshTurtles();
+  if(was && countDone()===TOTAL && !state.celebrated) celebrate(quiet===true);
+}
+function cancelCalling(){ clearCallTimers(); calling=false; dispCount=0; }
+function settleCalling(){ if(calling) finishCalling(true); }
+/* 依狀態重畫所有烏龜外觀（返回此階段、重設時使用；不會改變計數與特殊烏龜位置） */
+function refreshTurtles(){
+  turtleEls.forEach(function(b){ setTurtleView(b, state.turtles[Number(b.getAttribute('data-i'))]); });
+  $('#banner').hidden=!state.celebrated;
+  updateCount();
+}
+function renderCount(n){
+  $('#countText').textContent='已完成 '+n+'／'+TOTAL+' 隻';
+  $('#countText').setAttribute('aria-live', calling?'off':'polite');
+  $('#turtleBarFill').style.width=(n/TOTAL*100)+'%';
+  $('#turtleBar').setAttribute('aria-valuenow',n);
+}
+function updateCount(){
+  var real=countDone(), n=calling?dispCount:real, found=0, total=0, k;
+  renderCount(n);
+  for(k in state.specials){ total++; if(state.turtles[k]) found++; }
+  $('#countSub').textContent = calling ? '小烏龜正在趕來集合……' : (real<TOTAL ? (real===0?'點草地上的空位，或用下方按鈕呼叫':'還差 '+(TOTAL-real)+' 隻，繼續加油') : '全部到齊了！');
+  $('#specialSub').textContent = real>0 ? '本輪有 '+total+' 隻特殊造型小烏龜，已發現 '+found+' 隻 ★' : '';
+  $('#btnCallOne').disabled = calling || real>=TOTAL;
+  $('#btnCallAll').disabled = calling || real>=TOTAL;
+  $('#callAllDesc').textContent = (real>0 && real<TOTAL) ? '會保留你已呼叫的 '+real+' 隻，並補齊其餘的小烏龜。' : (real>=TOTAL ? '66 隻小烏龜都到齊了。' : '一次召集完整的 66 隻小烏龜，想快速完成時使用。');
+  $('#btn3Next').disabled = calling || real<TOTAL;
+}
+/* 66 隻完成的慶祝（quiet=true 時只記錄狀態，不播放特效） */
+function celebrate(quiet){
+  state.celebrated=true;
+  $('#banner').hidden=false;
+  if(quiet) return;
+  turtleEls.forEach(function(b,i){ b.style.setProperty('--cd',((i%11)*0.03).toFixed(2)+'s'); b.classList.add('cheer'); });
+  setTimeout(function(){ turtleEls.forEach(function(b){ b.classList.remove('cheer'); }); }, 1900);
+  rain(32,true);
+  toast('哇！66 隻小烏龜集合完成！');
+}
+/* 第三階段上方的天空（太陽位置沿用第二階段） */
+function buildMeadowSky(){
+  var sx = state.sun ? clamp(state.sun.x,15,85) : 50;
+  $('#mSky').innerHTML='<div class="cloud" style="left:3%;top:18%;animation-duration:20s">'+cloudSVG()+'</div>'
+    +'<div class="cloud" style="left:66%;top:40%;width:80px;animation-duration:26s;animation-delay:-9s">'+cloudSVG()+'</div>'
+    +'<div class="m-sun" style="--sx:'+sx+'%">'+sunSVG(state.sunType,'','你選擇的太陽')+'</div>';
+}
+function initTurtles(){
+  state.specials=rollSpecials();
+  renderTurtleGrid();
+  $('#turtleGrid').addEventListener('click', function(e){
+    var b=e.target.closest('.turtle'); if(!b) return;
+    tapTurtle(b, Number(b.getAttribute('data-i')));
+  });
+  $('#btnCallOne').addEventListener('click', callNext);
+  $('#btnCallAll').addEventListener('click', callAll);
+  $('#btnAuto').addEventListener('click', function(){
+    turtleEls.forEach(function(b){ b.style.removeProperty('--dx'); b.style.removeProperty('--dy'); b.style.removeProperty('--rot'); });
+    toast('小烏龜已整齊排列。');
+  });
+  $('#btnWalk').addEventListener('click', function(){
+    turtleEls.forEach(function(b){
+      b.style.setProperty('--dx',rand(-5,5).toFixed(1)+'px'); b.style.setProperty('--dy',rand(-5,5).toFixed(1)+'px'); b.style.setProperty('--rot',rand(-7,7).toFixed(1)+'deg');
+    });
+    toast('小烏龜們正在散步，按「自動排列」可以整隊。');
+  });
+  $('#btnTurtleReset').addEventListener('click', function(){
+    var n=countDone();
+    if(n===0){ toast('目前還沒有完成任何一隻小烏龜喔。'); return; }
+    confirmBox('要重新開始嗎？','目前已完成的 '+n+' 隻小烏龜會全部變回未完成，這個動作無法復原。','確定重新開始', function(){
+      cancelCalling(); state.turtles.fill(false); state.celebrated=false;
+      state.specials=rollSpecials(); renderTurtleGrid(); refreshTurtles(); setCallStatus(''); aimSoon();
+      toast('已重設，小烏龜們重新排隊囉。');
+    });
+  });
+  $('#btn3Back').addEventListener('click', function(){ goTo('2'); });
+  $('#btn3Next').addEventListener('click', function(){ if(!calling && countDone()===TOTAL) goTo('4'); });
+}
+
+/* =========================================================
+   11. 第四階段：心願
+   ========================================================= */
+function fillSummary(){
+  $('#sDate').textContent=fmtDate(state.date); $('#sPlace').textContent=state.place;
+  $('#sTime').textContent=state.start+' – '+state.end; $('#sType').textContent=typeLabel(state.type);
+}
+function updateWishCount(){ $('#wishCount').textContent=$('#wish').value.length+'／200 字'; }
+function initWish(){
+  $('#wish').addEventListener('input', function(){ state.wish=this.value; updateWishCount(); });
+  $('#btnWishReset').addEventListener('click', function(){ $('#wish').value=DEFAULT_WISH; state.wish=DEFAULT_WISH; updateWishCount(); });
+  $('#btn4Back').addEventListener('click', function(){ goTo('3'); });
+  $('#btn4Confirm').addEventListener('click', confirmWish);
+}
+/* 確認心願，顯示祈晴圖紙預覽 */
+function confirmWish(){
+  var el=$('#wish'), v=el.value.trim();
+  if(!v){ v=DEFAULT_WISH; el.value=v; toast('心願欄是空白的，先幫你放上預設祈願詞囉。'); }
+  state.wish=v; updateWishCount();
+  var card=buildCard('paper');
+  var wrap=document.createElement('div');
+  wrap.innerHTML='<p style="margin-bottom:10px">這是你的祈晴圖紙，請確認內容是否正確。需要修改的話，可以先返回。</p><div class="preview-card">'+card.svg+'</div>';
+  openModal({title:'確認你的祈晴圖紙', body:wrap, wide:true, actions:[
+    {label:'返回修改', kind:'secondary'},
+    {label:'前往祈願', kind:'primary', onClick:function(){ goTo('5'); }}
+  ]});
+}
+
+/* =========================================================
+   12. 祝福卡（SVG 產生，供顯示與 PNG 下載共用）
+   ========================================================= */
+var measureCtx = null;
+/* 量測文字寬度（用於自動換行） */
+function measure(text,size,weight){
+  try{
+    if(!measureCtx) measureCtx=document.createElement('canvas').getContext('2d');
+    measureCtx.font=(weight||400)+' '+size+'px '+FONT;
+    return measureCtx.measureText(text).width;
+  }catch(e){
+    var w=0; for(var i=0;i<text.length;i++){ w+= text.charCodeAt(i)>255 ? size : size*0.55; } return w;
+  }
+}
+var NO_START='，。、！？；：）」』…％,.!?;:)';
+/* 將文字依寬度換行，支援手動換行並避免標點出現在行首 */
+function wrapText(text,size,maxW,weight){
+  var out=[], blank=false, limit=maxW*0.94;
+  String(text).split(/\r?\n/).forEach(function(para){
+    if(para.trim()===''){ if(!blank) out.push(''); blank=true; return; }
+    blank=false;
+    var line='';
+    Array.from(para).forEach(function(ch){
+      var t=line+ch;
+      if(line && measure(t,size,weight)>limit && NO_START.indexOf(ch)<0){ out.push(line); line=ch; } else line=t;
+    });
+    if(line) out.push(line);
+  });
+  return out;
+}
+function cloudG(x,y,s){
+  return '<g transform="translate('+x+' '+y+') scale('+s+')" fill="#fff"><ellipse cx="60" cy="42" rx="52" ry="15"/><circle cx="38" cy="32" r="18"/><circle cx="68" cy="26" r="22"/><circle cx="92" cy="35" r="14"/></g>';
+}
+/* 產生祈晴圖紙（kind='paper'）或祝福卡（kind='card'），回傳 {svg, svgExport, w, h}。
+   66 隻烏龜讀取 state.specials（特殊造型）與太陽位置（頭部轉角），不會在此重新亂數。 */
+function buildCard(kind){
+  var isCard=(kind==='card'), W=900, M=50, IW=W-2*M;
+  var wishText=(state.wish||'').trim()||DEFAULT_WISH;
+  var place=state.place.trim();
+  var attrF='font-family="'+FONT+'"';
+  var infoDefs=[['祈願日期：',fmtDate(state.date)],['祈願地點：',place],['活動時段：',state.start+' – '+state.end],['活動類型：',typeLabel(state.type)]];
+  var infoLines=[];
+  infoDefs.forEach(function(d){ wrapText(d[0]+d[1],28,IW-60).forEach(function(ln,i){ infoLines.push({first:i===0, lab:d[0], ln:ln}); }); });
+  var wishLines=wrapText(wishText,28,IW-70);
+  var blessing=BLESSINGS[state.type]||BLESSINGS.other;
+  var blessLines=isCard?wrapText(blessing,30,IW-90,700):[];
+  var footLines=wrapText(FOOT_TEXT,21,IW-20);
+
+  var skyY=185, skyH=300, grassY=505, grassH=446;
+  var infoY=grassY+grassH+30, infoH=28+infoLines.length*42+14;
+  var wishY=infoY+infoH+24, wishH=28+40+wishLines.length*44+24;
+  var blessY=wishY+wishH+24, blessH=isCard?(34+blessLines.length*46+26):0;
+  var footY=(isCard?blessY+blessH:wishY+wishH)+34;
+  var creditH=isCard?40:0;   // 祝福卡底部多留一行署名的空間（祈晴圖紙不加）
+  var H=footY+footLines.length*32+44+creditH;
+
+  var b='';
+  // 標題
+  b+='<text x="'+W/2+'" y="104" text-anchor="middle" font-size="54" font-weight="700" fill="#4A3428" '+attrF+'>晴天烏龜祈願所</text>';
+  b+='<text x="'+W/2+'" y="156" text-anchor="middle" font-size="26" font-weight="700" fill="#6B5143" '+attrF+'>'+(isCard?'晴天祝福卡':'祈晴圖紙')+'</text>';
+  [[84,64,-30,'#F3D4D0'],[816,84,25,'#F3D4D0'],[150,168,40,'#F3D4D0'],[760,160,-15,'#F3D4D0']].forEach(function(p){ b+='<ellipse cx="'+p[0]+'" cy="'+p[1]+'" rx="10" ry="6.5" fill="'+p[3]+'" transform="rotate('+p[2]+' '+p[0]+' '+p[1]+')"/>'; });
+  // 天空與太陽
+  b+='<rect x="'+M+'" y="'+skyY+'" width="'+IW+'" height="'+skyH+'" rx="28" fill="#DCECF3"/>';
+  b+=cloudG(80,215,1.1)+cloudG(650,208,1)+cloudG(700,425,.7)+cloudG(115,430,.75);
+  var sx=state.sun?state.sun.x:50, sy=state.sun?state.sun.y:50;
+  var cx=clamp(M+clamp(sx,15,85)/100*IW, M+100, M+IW-100);
+  var cy=clamp(skyY+clamp(sy,15,85)/100*skyH, skyY+100, skyY+skyH-100);
+  b+='<g transform="translate('+cx.toFixed(1)+' '+cy.toFixed(1)+') scale(1.7)">'+sunInner(state.sunType)+'</g>';
+  // 草地與 66 隻烏龜（每隻頭部朝向太陽；特殊造型位置取自 state.specials）
+  b+='<rect x="'+M+'" y="'+grassY+'" width="'+IW+'" height="'+grassH+'" rx="28" fill="#DCEBD3"/>';
+  var cellW=IW/11, S=64, i;
+  for(i=0;i<TOTAL;i++){
+    var r=Math.floor(i/11), c=i%11;
+    var tx=M+c*cellW+(cellW-S)/2, ty=grassY+26+r*68;
+    var ap=aimParams(cx-(tx+S/2), cy-(ty+S*0.4));   // 每隻烏龜依太陽位置左右翻面、抬頭看太陽
+    b+='<g transform="translate('+tx.toFixed(1)+' '+ty+') scale('+(S/100)+')">'+turtleInner({shell:SHELLS[i%3], kind:state.specials[i]||'', eye:(i%4===1?'happy':'open'), fl:ap.fl, ha:ap.ha})+'</g>';
+  }
+  var fc=['#F3B7BE','#FFFFFF','#F2B99B','#F6D77A'];
+  for(i=0;i<14;i++){
+    var fx=M+30+i*((IW-60)/13), fy=grassY+grassH-13;
+    b+='<g transform="translate('+fx.toFixed(1)+' '+fy+') scale(.9)">'+flowerG(0,0,3.8,fc[i%4],'#F6D77A')+'</g>';
+  }
+  // 資訊
+  b+='<rect x="'+M+'" y="'+infoY+'" width="'+IW+'" height="'+infoH+'" rx="24" fill="#fff" stroke="#F3D4D0" stroke-width="3"/>';
+  infoLines.forEach(function(l,i){
+    var y=infoY+28+28+i*42-6;
+    var inner = l.first ? '<tspan font-weight="700">'+esc(l.lab)+'</tspan>'+esc(l.ln.slice(l.lab.length)) : esc(l.ln);
+    b+='<text x="'+(M+30)+'" y="'+y+'" font-size="28" fill="#6B5143" '+attrF+'>'+inner+'</text>';
+  });
+  // 祈願文字
+  b+='<rect x="'+M+'" y="'+wishY+'" width="'+IW+'" height="'+wishH+'" rx="24" fill="#fff" stroke="#DCEBD3" stroke-width="3"/>';
+  b+='<text x="'+(M+35)+'" y="'+(wishY+28+30)+'" font-size="28" font-weight="700" fill="#4A3428" '+attrF+'>我的心願</text>';
+  wishLines.forEach(function(ln,i){
+    b+='<text x="'+(M+35)+'" y="'+(wishY+28+40+30+i*44-8)+'" font-size="28" fill="#6B5143" '+attrF+'>'+esc(ln)+'</text>';
+  });
+  // 專屬祝福
+  if(isCard){
+    b+='<rect x="'+M+'" y="'+blessY+'" width="'+IW+'" height="'+blessH+'" rx="24" fill="#F3D4D0"/>';
+    blessLines.forEach(function(ln,i){
+      b+='<text x="'+W/2+'" y="'+(blessY+34+34+i*46-6)+'" text-anchor="middle" font-size="30" font-weight="700" fill="#4A3428" '+attrF+'>'+esc(ln)+'</text>';
+    });
+  }
+  // 頁尾聲明
+  footLines.forEach(function(ln,i){
+    b+='<text x="'+W/2+'" y="'+(footY+22+i*32)+'" text-anchor="middle" font-size="21" fill="#6B5143" '+attrF+'>'+esc(ln)+'</text>';
+  });
+  // 署名（只放在祝福卡）
+  if(isCard){
+    b+='<text x="'+W/2+'" y="'+(footY+footLines.length*32+30)+'" text-anchor="middle" font-size="22" font-weight="700" fill="#8A6F5E" '+attrF+'>Made by Peggy Lin</text>';
+  }
+
+  var label=(isCard?'晴天祝福卡':'祈晴圖紙')+'：'+fmtDate(state.date)+'，'+place+'，'+state.start+' 至 '+state.end+'，'+typeLabel(state.type)+'。含微笑太陽與 66 隻小烏龜。心願：'+wishText;
+  function wrap(exportMode){
+    var head='<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 '+W+' '+H+'"'
+      +(exportMode?' width="'+W+'" height="'+H+'"':' role="img" aria-label="'+esc(label)+'" style="display:block;width:100%;height:auto"')+'>';
+    var bg='<rect width="'+W+'" height="'+H+'" rx="'+(exportMode?0:44)+'" fill="#FFF9F0"/><rect x="14" y="14" width="'+(W-28)+'" height="'+(H-28)+'" rx="34" fill="none" stroke="#A9C7A0" stroke-width="6"/>';
+    return head+bg+b+'</svg>';
+  }
+  return {svg:wrap(false), svgExport:wrap(true), w:W, h:H};
+}
+/* 產生第六階段祝福卡並顯示 */
+function buildFinalCard(){
+  lastCard=buildCard('card');
+  $('#cardHost').innerHTML=lastCard.svg;
+}
+
+/* =========================================================
+   13. 第五階段：祈願儀式（純數位象徵動畫：Canvas 燃燒＋火焰＋灰燼）
+   流程：祈願紙出現 → 火焰點燃 → 沿不規則邊界蔓延 → 焦黑碎裂 → 化為灰燼 → 灰燼飄散 → 完成
+   ========================================================= */
+var NB = 512;              // 燃燒時間分桶數（只處理火線附近的像素，降低每幀成本）
+var P_END = 1.2;           // 燃燒進度終點（>1 讓最後的焦黑邊緣也完全碎裂）
+var SCORCH = 0.12, FIREW = 0.035;   // 焦黃帶寬度、火線寬度（以燃燒進度計）
+var ritual = {
+  timers:[], raf:0, running:false, done:false, token:0,
+  ready:false, field:false, simple:false, fallback:false, prompted:false,
+  card:null, src:null, out:null, ctx:null, PW:0, PH:0, T:null, fT:null, rn:null, order:null, bs:null, cleared:0, fl:0, bf:null,
+  fxc:null, fxw:0, fxh:0, bx:0, by:0, bw:0, bh:0,
+  flames:[], sparks:[], ash:[], accF:0, accS:0, accA:0, burst:false, walking:false, t0:0, last:0, fy:0
+};
+/* 低階裝置：減少粒子與解析度（但仍保留清楚的火焰蔓延與灰燼效果） */
+function lowEnd(){
+  var hc=navigator.hardwareConcurrency||4;
+  return hc<=4 || Math.min(window.innerWidth,window.innerHeight)<420 || (navigator.deviceMemory && navigator.deviceMemory<=2);
+}
+function ritualQ(){ return lowEnd()?1:Math.min(window.devicePixelRatio||1,1.5); }
+
+/* ---- 場景建立 ---- */
+function buildRitualScene(){
+  $('#rSky').innerHTML='<div class="r-cloud" style="left:4%;top:8%;animation-duration:22s">'+cloudSVG()+'</div><div class="r-cloud" style="left:68%;top:20%;width:90px;animation-duration:28s;animation-delay:-10s">'+cloudSVG()+'</div>';
+  $('#rSun').innerHTML=sunSVG(state.sunType,'','你選擇的太陽');
+  var pos=[[5,5],[18,9],[67,4],[80,8],[90,3]], h='';
+  pos.forEach(function(p,i){
+    h+='<div class="r-turtle" style="--l:'+p[0]+'%;--b:'+p[1]+'%;--bd:'+(-i*1.1)+'s">'+turtleSVG({shell:SHELLS[i%3], eye:(i%2?'happy':'open')})+'</div>';
+  });
+  $('#rTurtles').innerHTML=h;
+  $('#verse').innerHTML=RITUAL_VERSE.map(function(t){ return '<p>'+esc(t)+'</p>'; }).join('');
+  ritual.card=buildCard('paper');
+  $('#rPaperBox').style.setProperty('--ar', ritual.card.w+' / '+ritual.card.h);
+  $('#rPaperFallback').innerHTML=ritual.card.svg;
+  resetRitualView();
+  requestAnimationFrame(function(){ if(state.stage==='5'){ preparePaper(); aimCurrent(); } });
+}
+/* 在 canvas 上畫出略帶不規則邊緣的祈願紙 */
+function makeTorn(PW,PH){
+  var j=Math.max(1.2,PW*0.006), step=Math.max(6,PW*0.03), m=j+1, pts=[], x, y;
+  for(x=m;x<=PW-m;x+=step) pts.push([x,m+Math.random()*j]);
+  for(y=m;y<=PH-m;y+=step) pts.push([PW-m-Math.random()*j,y]);
+  for(x=PW-m;x>=m;x-=step) pts.push([x,PH-m-Math.random()*j]);
+  for(y=PH-m;y>=m;y-=step) pts.push([m+Math.random()*j,y]);
+  return pts;
+}
+function tornPath(c,pts){
+  c.beginPath();
+  pts.forEach(function(p,i){ if(i===0) c.moveTo(p[0],p[1]); else c.lineTo(p[0],p[1]); });
+  c.closePath();
+}
+function drawPaperTo(c,img,PW,PH){
+  var pts=makeTorn(PW,PH), i;
+  c.clearRect(0,0,PW,PH);
+  c.save(); tornPath(c,pts); c.clip();
+  c.fillStyle='#FFF9F0'; c.fillRect(0,0,PW,PH);
+  c.drawImage(img,0,0,PW,PH);
+  for(i=0;i<260;i++){ c.fillStyle='rgba(107,81,67,'+(Math.random()*0.06).toFixed(3)+')'; c.fillRect(Math.random()*PW,Math.random()*PH,1+Math.random()*2.5,1+Math.random()*2.5); }
+  c.lineWidth=Math.max(3,PW*0.02); c.strokeStyle='rgba(107,81,67,.3)'; tornPath(c,pts); c.stroke();
+  c.restore();
+}
+/* 將祈願紙（SVG）畫到 canvas 並取出像素；失敗時退回 SVG 淡出的簡化模式 */
+function preparePaper(){
+  var box=$('#rPaperBox'), cv=$('#rPaperCanvas'), rect=box.getBoundingClientRect();
+  releaseBurn();
+  if(!rect.width || !ritual.card) return;
+  var q=ritualQ(), PW=Math.max(60,Math.round(rect.width*q)), PH=Math.max(100,Math.round(rect.height*q));
+  while(PW*PH>300000){ PW=Math.round(PW*.9); PH=Math.round(PH*.9); }
+  var token=++ritual.token, img=new Image();
+  img.onload=function(){
+    if(token!==ritual.token) return;
+    try{
+      cv.width=PW; cv.height=PH;
+      var c=cv.getContext('2d',{willReadFrequently:true}); if(!c) throw new Error('no-2d');
+      drawPaperTo(c,img,PW,PH);
+      ritual.src=c.getImageData(0,0,PW,PH);
+      ritual.PW=PW; ritual.PH=PH; ritual.ctx=c; ritual.ready=true;
+      cv.hidden=false; $('#rPaperFallback').hidden=true;
+      startBurnField(false);
+    }catch(e){ ritual.ready=false; cv.hidden=true; $('#rPaperFallback').hidden=false; }
+  };
+  img.onerror=function(){ if(token===ritual.token) ritual.ready=false; };
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(ritual.card.svgExport);
+}
+
+/* ---- 燃燒時間場：每個像素何時被火線燒到（不規則邊界） ---- */
+/* 以多個起火點的距離加上多層值噪聲，得到 0..1 的點燃時間 T；另有各像素碎裂門檻 fT 與亂數 rn。
+   分段（每次處理一批列）計算，避免進入畫面時卡頓；開始祈願時若尚未算完會同步補完。 */
+function startBurnField(sync){
+  var R=ritual, PW=R.PW, PH=R.PH, N=PW*PH, i, G=48, g=new Float32Array(G*G);
+  for(i=0;i<g.length;i++) g[i]=Math.random();
+  var bf={y:0, mn:1e9, mx:-1e9, g:g, G:G, token:R.token,
+    seeds:[[PW*.06,PH,0],[PW*(.35+Math.random()*.3),PH,.05],[PW*.94,PH,.1],[PW*(.2+Math.random()*.6),PH*(.5+Math.random()*.25),.3],[PW*(.2+Math.random()*.6),PH*(.4+Math.random()*.3),.45]]};
+  R.T=new Float32Array(N); R.fT=new Float32Array(N); R.rn=new Uint8Array(N); R.bf=bf; R.field=false;
+  for(i=0;i<N;i++) R.rn[i]=(Math.random()*256)|0;
+  function run(rows){
+    if(R.bf!==bf || bf.token!==R.token) return;
+    var end=Math.min(PH,bf.y+rows), x, y, s, best, dx, dy, v, nz, inv=1/(PH*1.1);
+    for(y=bf.y;y<end;y++){
+      for(x=0;x<PW;x++){
+        best=9;
+        for(s=0;s<bf.seeds.length;s++){ dx=x-bf.seeds[s][0]; dy=y-bf.seeds[s][1]; v=bf.seeds[s][2]+Math.sqrt(dx*dx+dy*dy)*inv; if(v<best) best=v; }
+        nz=vnoise(bf,x/PW*7,y/PH*10)*0.55+vnoise(bf,x/PW*19,y/PH*26)*0.3+vnoise(bf,x/PW*47,y/PH*46)*0.15;
+        best+=(nz-0.5)*0.26;
+        R.T[y*PW+x]=best; if(best<bf.mn) bf.mn=best; if(best>bf.mx) bf.mx=best;
+      }
+    }
+    bf.y=end;
+    if(bf.y<PH){ setTimeout(function(){ run(Math.ceil(PH/10)); },0); }
+    else finishBurnField(bf);
+  }
+  if(sync) run(PH); else setTimeout(function(){ run(Math.ceil(PH/10)); },30);
+}
+function vnoise(bf,x,y){
+  var G=bf.G, g=bf.g, xi=Math.floor(x), yi=Math.floor(y), xf=x-xi, yf=y-yi;
+  xf=xf*xf*(3-2*xf); yf=yf*yf*(3-2*yf);
+  var x0=xi%G, x1=(xi+1)%G, y0=yi%G, y1=(yi+1)%G;
+  var a=g[y0*G+x0], b=g[y0*G+x1], c=g[y1*G+x0], d=g[y1*G+x1];
+  return a+(b-a)*xf+(c-a)*yf+(a-b-c+d)*xf*yf;
+}
+function finishBurnField(bf){
+  var R=ritual, PW=R.PW, PH=R.PH, N=PW*PH, i, x, y, span=(bf.mx-bf.mn)||1, cnt=new Int32Array(NB+1), b;
+  for(i=0;i<N;i++){
+    R.T[i]=(R.T[i]-bf.mn)/span;
+    x=i%PW; y=(i/PW)|0;
+    R.fT[i]=0.10+0.075*(0.6*vnoise(bf,x/PW*14,y/PH*18)+0.4*(R.rn[i]/255));
+    b=Math.min(NB-1,Math.floor(R.T[i]*NB)); cnt[b+1]++;
+  }
+  for(i=0;i<NB;i++) cnt[i+1]+=cnt[i];
+  var pos=cnt.slice(0,NB), order=new Uint32Array(N);
+  for(i=0;i<N;i++){ b=Math.min(NB-1,Math.floor(R.T[i]*NB)); order[pos[b]++]=i; }
+  R.order=order; R.bs=cnt; R.field=true; R.bf=null;
+}
+/* 釋放燃燒用的大型陣列與畫布（離開儀式、重新建立時呼叫） */
+function releaseBurn(){
+  var R=ritual;
+  R.token++; R.src=null; R.out=null; R.ctx=null; R.T=null; R.fT=null; R.rn=null; R.order=null; R.bs=null; R.bf=null;
+  R.ready=false; R.field=false;
+}
+
+/* ---- 每幀：祈願紙逐像素燃燒 ---- */
+/* p 為燃燒進度。每個像素依 dt = p - T 分段：
+   未燃燒 → 焦糖色（接近火線）→ 火線（奶油黃→橘→磚紅，平塗色帶）→ 焦糖棕→深棕→炭黑碎裂（有金橘小餘燼閃爍）→ 脫落成灰（透明） */
+function drawBurn(p){
+  var R=ritual, d=R.out.data, s=R.src.data, T=R.T, fT=R.fT, rn=R.rn, order=R.order, bs=R.bs;
+  var k, b, idx, i4, dt, f, m, r, g, bl, a, c, span, rv, flk=R.fl, thr;
+  R.fl=(R.fl+89)&255; flk=R.fl;   // 餘燼閃爍：每幀換一組亂數遮罩
+  var bClear=Math.max(0,Math.min(NB,Math.floor((p-0.18)*NB)));
+  while(R.cleared<bClear){
+    b=R.cleared;
+    for(k=bs[b];k<bs[b+1];k++) d[(order[k]<<2)+3]=0;
+    R.cleared++;
+  }
+  var bEnd=Math.min(NB,Math.floor((p+SCORCH+0.005)*NB)+1);
+  for(b=R.cleared;b<bEnd;b++){
+    for(k=bs[b];k<bs[b+1];k++){
+      idx=order[k]; i4=idx<<2; a=s[i4+3];
+      if(a===0) continue;
+      dt=p-T[idx];
+      if(dt<-SCORCH) continue;
+      if(dt<0){
+        m=(dt+SCORCH)/SCORCH; m=m*m*0.88;
+        d[i4]=s[i4]*(1-m)+196*m; d[i4+1]=s[i4+1]*(1-m)+124*m; d[i4+2]=s[i4+2]*(1-m)+62*m; d[i4+3]=a;
+      }else if(dt<FIREW){
+        f=dt/FIREW;
+        if(f<0.34){ m=f/0.34; r=255; g=232-34*m; bl=150-84*m; }            // 奶油黃 → 金黃
+        else if(f<0.72){ m=(f-0.34)/0.38; r=255-8*m; g=198-70*m; bl=66-26*m; }  // 金黃 → 亮橘
+        else{ m=(f-0.72)/0.28; r=247-100*m; g=128-80*m; bl=40-12*m; }           // 亮橘 → 磚紅褐
+        d[i4]=r; d[i4+1]=g; d[i4+2]=bl; d[i4+3]=a;
+      }else if(dt<fT[idx]){
+        span=fT[idx]-FIREW; c=(dt-FIREW)/span; rv=rn[idx];
+        // 焦糖棕 (150,92,46) → 深棕 (84,52,36) → 炭黑 (40,32,30)，最後轉為灰褐碎屑
+        if(c<0.3){ m=c/0.3; r=150-66*m; g=92-40*m; bl=46-10*m; }
+        else if(c<0.7){ m=(c-0.3)/0.4; r=84-44*m; g=52-20*m; bl=36-6*m; }
+        else{ m=(c-0.7)/0.3; r=40+70*m; g=32+62*m; bl=30+58*m; }
+        r+=(rv&7); g+=(rv&5); bl+=(rv&3);
+        thr=(1-c)*(1-c)*64+(dt<0.06?36:0);
+        if(((rv^flk)&255)<thr){ m=1-c*0.7; r=255*m; g=(150+(rv&47))*m; bl=48*m; }   // 金橘小餘燼
+        d[i4]=r; d[i4+1]=g; d[i4+2]=bl;
+        d[i4+3]=(c>0.93)?a*(1-(c-0.93)/0.07):a;
+      }else{
+        d[i4+3]=0;
+      }
+    }
+  }
+  R.ctx.putImageData(R.out,0,0);
+}
+
+/* ---- 粒子：火焰、火星、灰燼（畫在整個場景的 canvas 上） ---- */
+function layoutFx(){
+  var R=ritual, sc=$('#ritualScene'), box=$('#rPaperBox'), fx=$('#rFx'), sr=sc.getBoundingClientRect(), br=box.getBoundingClientRect();
+  var q=ritualQ(), w=Math.max(1,Math.round(sr.width*q)), h=Math.max(1,Math.round(sr.height*q));
+  if(fx.width!==w||fx.height!==h){ fx.width=w; fx.height=h; }
+  var c=fx.getContext('2d');
+  if(!c){ R.fxc=null; return; }
+  c.setTransform(q,0,0,q,0,0);
+  R.fxc=c; R.fxw=sr.width; R.fxh=sr.height;
+  R.bx=br.left-sr.left; R.by=br.top-sr.top; R.bw=br.width; R.bh=br.height;
+}
+/* 在燃燒進度 p 附近、時間差落在 [lo,hi) 的像素中隨機找一個，回傳場景座標 */
+function sampleSpot(p,lo,hi,tries){
+  var R=ritual, N=R.PW*R.PH, i, idx, dt;
+  for(i=0;i<tries;i++){
+    idx=(Math.random()*N)|0; dt=p-R.T[idx];
+    if(dt>=lo && dt<hi && R.src.data[(idx<<2)+3]>20){
+      return {x:R.bx+(idx%R.PW)/R.PW*R.bw, y:R.by+((idx/R.PW)|0)/R.PH*R.bh};
+    }
+  }
+  return null;
+}
+var ASH_COLS=['#4A3F3A','#6B5F58','#8E8279','#B5AAA0','#D6CCC1'];
+/* 灰燼：kind 0=圓潤橢圓、1=圓角方片、2=奶油色紙屑（帶焦糖邊，僅在碎裂初期出現）；lifeK 調整壽命 */
+function spawnAsh(x,y,scrap,lifeK){
+  var R=ritual, lim=lowEnd()?170:340, sc=clamp(R.bw/230,0.8,1.5);
+  if(R.ash.length>=lim) return;
+  var kind=scrap?2:(Math.random()<.45?1:0);
+  R.ash.push({x:x,y:y,vx:(Math.random()-.5)*34,vy:-(24+Math.random()*50),rot:Math.random()*6.28,vr:(Math.random()-.5)*4,
+    s:(2.2+Math.random()*3.6)*sc, life:(1.6+Math.random()*1.3)*(lifeK||1), age:0, col:ASH_COLS[(Math.random()*ASH_COLS.length)|0], kind:kind, asp:.65+Math.random()*.3, side:Math.random()<.5?-1:1});
+}
+/* Q 版火焰：底部圓潤、頂端是圓頭（不尖）。(x,y)=底部中心，w=半寬，h=高，lean=頂端偏移 */
+function qFlame(c,x,y,w,h,lean){
+  var rt=w*0.5, ty=y-h+rt;
+  c.beginPath();
+  c.moveTo(x-w,y);
+  c.bezierCurveTo(x-w*1.12,y-h*0.5, x-rt+lean,ty+rt*1.5, x-rt+lean,ty);
+  c.arc(x+lean,ty,rt,Math.PI,0,false);
+  c.bezierCurveTo(x+rt+lean,ty+rt*1.5, x+w*1.12,y-h*0.5, x+w,y);
+  c.quadraticCurveTo(x,y+w*0.85,x-w,y);
+  c.closePath();
+}
+/* 產生、更新、繪製所有粒子；p<0 表示尚未點火 */
+function stepFx(dt,t,p){
+  var R=ritual, c=R.fxc; if(!c) return;
+  var low=lowEnd(), i, o, s, ageK, w, h, x, y, hitCount=0, fySum=0;
+  c.clearRect(0,0,R.fxw,R.fxh);
+  if(p>=0 && R.field){
+    var power=Math.min(1,0.25+p/0.2)*(p>1.05?Math.max(0,1-(p-1.05)/0.15):1);
+    // 火焰：沿火線（0 ≤ dt < FIREW）冒出
+    R.accF+=(low?80:130)*power*dt; var base=clamp(R.bw*0.088,10,25);
+    while(R.accF>=1){
+      R.accF--; s=sampleSpot(p,0,FIREW,60);
+      if(s && R.flames.length<(low?120:230)){
+        var sz=base*(0.78+Math.random()*0.5);
+        R.flames.push({x:s.x,y:s.y,s:sz,life:0.5+Math.random()*0.45,age:0,ph:Math.random()*6.28,rise:sz*(1.5+Math.random()*0.8)});
+        hitCount++; fySum+=s.y;
+      }
+    }
+    // 火星：少量亮點往上飄
+    R.accS+=(low?20:42)*power*dt;
+    while(R.accS>=1){
+      R.accS--; s=sampleSpot(p,0,FIREW*1.6,50);
+      if(s && R.sparks.length<(low?40:80)) R.sparks.push({x:s.x,y:s.y,vx:(Math.random()-.5)*36,vy:-(35+Math.random()*70),life:0.7+Math.random()*0.8,age:0,r:1.5+Math.random()*1.9,star:Math.random()<.4});
+    }
+    // 灰燼：從正在碎裂的焦黑帶脫落，被風吹向兩側
+    R.accA+=(low?70:140)*(p>0.12?1:0)*dt;
+    while(R.accA>=1){ R.accA--; s=sampleSpot(p,0.10,0.18,60); if(s) spawnAsh(s.x,s.y,Math.random()<.3,1); }
+    if(p>=P_END && !R.burst){
+      R.burst=true;   // 收尾：一小團灰燼加上少量金橘小火星，輕輕往上飄散
+      for(i=0;i<(low?24:50);i++) spawnAsh(R.bx+Math.random()*R.bw, R.by+R.bh*(0.35+Math.random()*0.65), false, 0.8);
+      for(i=0;i<(low?6:14);i++) R.sparks.push({x:R.bx+R.bw*(0.15+Math.random()*0.7),y:R.by+R.bh*(0.45+Math.random()*0.5),vx:(Math.random()-.5)*30,vy:-(30+Math.random()*50),life:0.9+Math.random()*0.8,age:0,r:1.8+Math.random()*1.8,star:Math.random()<.5});
+    }
+    if(hitCount) R.fy=R.fy*0.8+(fySum/hitCount)*0.2;
+  }
+  // Q 版火焰：圓頭、四層平塗色（橘紅外層→亮橘→金黃→奶油亮點），輕微彈跳（壓扁／拉長）
+  for(i=R.flames.length-1;i>=0;i--){
+    o=R.flames[i]; o.age+=dt;
+    if(o.age>=o.life){ R.flames.splice(i,1); continue; }
+    ageK=o.age/o.life;
+    var bounce=Math.sin(o.ph+o.age*13), grow=Math.min(1,o.age/0.12)*(1-Math.pow(ageK,2.2)*0.65);
+    h=o.s*1.5*grow*(1+bounce*0.12); w=o.s*0.62*grow*(1-bounce*0.09);
+    x=o.x+Math.sin(o.ph+o.age*7)*o.s*0.2; y=o.y-o.rise*ageK;
+    var lean=Math.sin(o.ph*1.7+o.age*9)*w*0.28, al=Math.min(1,(1-ageK)*1.6);
+    c.globalAlpha=al;
+    qFlame(c,x,y,w,h,lean); c.fillStyle='#E4572E'; c.fill(); c.lineWidth=1.5; c.strokeStyle='rgba(138,34,8,.55)'; c.stroke();
+    qFlame(c,x,y,w*0.76,h*0.8,lean*0.8); c.fillStyle='#FB9A2F'; c.fill();
+    qFlame(c,x,y,w*0.5,h*0.56,lean*0.6); c.fillStyle='#FFCF4A'; c.fill();
+    c.fillStyle='#FFF3C4'; c.beginPath(); c.ellipse(x-w*0.12+lean*0.4,y-h*0.34,w*0.16,h*0.12,-0.3,0,6.283); c.fill();
+  }
+  c.globalAlpha=1;
+  // 小火星：金橘圓點與四芒小星
+  for(i=R.sparks.length-1;i>=0;i--){
+    o=R.sparks[i]; o.age+=dt;
+    if(o.age>=o.life){ R.sparks.splice(i,1); continue; }
+    o.x+=o.vx*dt; o.y+=o.vy*dt; o.vy+=14*dt;
+    ageK=o.age/o.life; var rs=o.r*(1-ageK*0.45);
+    c.globalAlpha=Math.min(1,(1-ageK)*1.5);
+    c.fillStyle=ageK<0.5?'#FFCF4A':'#FB9A2F';
+    if(o.star){
+      c.beginPath(); c.moveTo(o.x,o.y-rs*1.7); c.quadraticCurveTo(o.x+rs*.25,o.y-rs*.25,o.x+rs*1.7,o.y); c.quadraticCurveTo(o.x+rs*.25,o.y+rs*.25,o.x,o.y+rs*1.7);
+      c.quadraticCurveTo(o.x-rs*.25,o.y+rs*.25,o.x-rs*1.7,o.y); c.quadraticCurveTo(o.x-rs*.25,o.y-rs*.25,o.x,o.y-rs*1.7); c.fill();
+    }else{ c.beginPath(); c.arc(o.x,o.y,rs,0,6.283); c.fill(); }
+  }
+  c.globalAlpha=1;
+  // 灰燼：圓角小碎片，輕盈地向上、左右搖擺飄散，慢慢縮小、變透明
+  for(i=R.ash.length-1;i>=0;i--){
+    o=R.ash[i]; o.age+=dt;
+    if(o.age>=o.life){ R.ash.splice(i,1); continue; }
+    ageK=o.age/o.life;
+    o.vx+=(Math.sin(t*1.3+o.x*0.015)*30+o.side*16)*dt; o.vx*=1-0.8*dt;
+    o.vy+=-12*dt; o.vy*=1-0.55*dt;
+    o.x+=o.vx*dt; o.y+=o.vy*dt; o.rot+=o.vr*dt;
+    c.save(); c.translate(o.x,o.y); c.rotate(o.rot);
+    c.globalAlpha=Math.max(0,1-Math.pow(ageK,1.5));
+    var sz2=o.s*(1-ageK*0.5);
+    if(o.kind===0){ c.fillStyle=o.col; c.beginPath(); c.ellipse(0,0,sz2*1.1,sz2*o.asp,0,0,6.283); c.fill(); }
+    else{
+      var rw=sz2*1.05, rh=sz2*o.asp*1.2, rr=Math.min(rw,rh)*0.55;
+      c.beginPath(); c.moveTo(-rw+rr,-rh); c.lineTo(rw-rr,-rh); c.quadraticCurveTo(rw,-rh,rw,-rh+rr); c.lineTo(rw,rh-rr); c.quadraticCurveTo(rw,rh,rw-rr,rh);
+      c.lineTo(-rw+rr,rh); c.quadraticCurveTo(-rw,rh,-rw,rh-rr); c.lineTo(-rw,-rh+rr); c.quadraticCurveTo(-rw,-rh,-rw+rr,-rh); c.closePath();
+      if(o.kind===2){ c.fillStyle='#F6E7C6'; c.fill(); c.lineWidth=Math.max(1,sz2*0.35); c.strokeStyle='#8A5A32'; c.stroke(); }
+      else{ c.fillStyle=o.col; c.fill(); }
+    }
+    c.restore();
+  }
+  c.globalAlpha=1;
+}
+function fxEmpty(){ var R=ritual; return !R.flames.length && !R.sparks.length && !R.ash.length; }
+
+/* ---- 主迴圈（requestAnimationFrame；離開儀式、重設時一定會停止） ---- */
+function ritualFrame(now){
+  var R=ritual; if(!R.running) return;
+  var t=(now-R.t0)/1000, dt=Math.min(0.05,Math.max(0.001,(now-R.last)/1000)); R.last=now;
+  var ign=R.simple?0.3:0.9, burn=R.simple?1.9:5.5, end=R.simple?2.6:8.0;
+  var p=t<ign?-1:Math.min(P_END,P_END*((t-ign)/burn));
+  if(R.ready && R.field && R.out){
+    if(p>=0) drawBurn(p);
+    var fire=$('#rFire');
+    if(p>=0){
+      var lvl=Math.sin(Math.PI*clamp(p/1.15,0,1));
+      fire.style.opacity=(lvl*(0.8+Math.random()*0.2)).toFixed(3);
+      fire.style.transform='translateY('+((R.fy||R.by+R.bh)-R.fxh*0.78).toFixed(0)+'px)';
+    }
+  }
+  if(!R.simple && !R.fallback) stepFx(dt,t,p);
+  if(R.walking) aimAll($('#rTurtles'), $('#rSun'));
+  if((t>=end && (R.simple || R.fallback || fxEmpty())) || t>=end+1.6){ finishRitual(); return; }
+  R.raf=requestAnimationFrame(ritualFrame);
+}
+function clearRitualTimers(){ ritual.timers.forEach(clearTimeout); ritual.timers=[]; }
+/* 還原儀式畫面到初始狀態，並取消所有動畫與計時器（離開此階段、返回修改、重新進入時呼叫） */
+function resetRitualView(leaving){
+  var R=ritual;
+  clearRitualTimers(); cancelAnimationFrame(R.raf); R.raf=0;
+  R.running=false; R.done=false; R.walking=false; R.burst=false; R.cleared=0; R.prompted=false;
+  R.flames=[]; R.sparks=[]; R.ash=[]; R.accF=R.accS=R.accA=0; R.fy=0;
+  var sc=$('#ritualScene'); if(!sc) return;
+  sc.classList.remove('ritual-on','walk');
+  var box=$('#rPaperBox'); box.classList.remove('appear','burning','fb-burn'); box.classList.add('pre');
+  var fire=$('#rFire'); fire.style.opacity=0; fire.style.transform='';
+  $$('#rTurtles .r-turtle').forEach(function(t){ t.style.removeProperty('--tx'); t.style.removeProperty('--ty'); });
+  if(R.fxc){ R.fxc.clearRect(0,0,R.fxw,R.fxh); }
+  var fx=$('#rFx'); if(fx && R.fxc===null){ fx.width=1; fx.height=1; }
+  $('#rDone').hidden=true; $('#btnRitual').disabled=false; $('#btnRitual').hidden=false;
+  $('#ritualStatus').textContent='';
+  if(leaving){ releaseBurn(); var cv=$('#rPaperCanvas'); cv.width=1; cv.height=1; cv.hidden=true; $('#rPaperFallback').hidden=false; }
+}
+function startWalk(){
+  var sc=$('#ritualScene'), sr=sc.getBoundingClientRect(), ts=$$('#rTurtles .r-turtle'), n=ts.length;
+  ts.forEach(function(t,i){
+    var r=t.getBoundingClientRect(), cx=r.left+r.width/2-sr.left;
+    var target=sr.width/2+(i-(n-1)/2)*Math.min(70,sr.width/(n+1));
+    t.style.setProperty('--tx',(target-cx).toFixed(0)+'px');
+    t.style.setProperty('--ty',(-(14+(i%3)*14))+'px');
+  });
+  sc.classList.add('walk'); ritual.walking=true;
+}
+/* 開始祈願：整段約 8～9 秒（減少動態效果時約 3 秒）。只有玩家按下「開始祈願」才會執行。 */
+function startRitual(){
+  var R=ritual; if(R.running || R.done) return;
+  R.running=true; $('#btnRitual').disabled=true;
+  R.simple=reduced();
+  if(R.ready && !R.field && R.bf){ R.bf=null; startBurnField(true); }   // 尚未算完就同步補完
+  R.fallback=!(R.ready && R.field);
+  if(!R.fallback){ R.out=new ImageData(new Uint8ClampedArray(R.src.data), R.PW, R.PH); R.cleared=0; }
+  try{ $('#ritualScene').scrollIntoView({block:'center', behavior:'auto'}); }catch(e){}
+  layoutFx();
+  $('#ritualScene').classList.add('ritual-on');
+  var box=$('#rPaperBox'); box.classList.add('appear');
+  var k=R.simple?0.3:1, status=$('#ritualStatus');
+  var at=function(ms,fn){ R.timers.push(setTimeout(fn, ms*k)); };
+  status.textContent='深呼吸，把心願交給春天。（這是遊戲內的數位象徵動畫）';
+  at(900,function(){
+    box.classList.remove('pre'); box.classList.add('burning'); if(R.fallback) box.classList.add('fb-burn');
+    status.textContent='祈願紙被點燃了，火光沿著紙緣慢慢蔓延……';
+  });
+  at(3200,function(){ status.textContent='紙張漸漸焦黑、捲起，字跡被火光帶走……'; });
+  at(4800,startWalk);
+  at(5600,function(){ status.textContent='化為灰燼，隨風輕輕飄向天空……'; });
+  R.t0=performance.now(); R.last=R.t0;
+  R.raf=requestAnimationFrame(ritualFrame);
+}
+function finishRitual(){
+  var R=ritual;
+  cancelAnimationFrame(R.raf); R.raf=0; clearRitualTimers();
+  R.running=false; R.done=true; R.walking=false;
+  if(R.fxc) R.fxc.clearRect(0,0,R.fxw,R.fxh);
+  R.flames=[]; R.sparks=[]; R.ash=[];
+  if(R.ready && R.ctx) R.ctx.clearRect(0,0,R.PW,R.PH);
+  $('#rPaperBox').classList.add('fb-burn');
+  $('#rFire').style.opacity=0;
+  R.out=null; R.T=null; R.fT=null; R.rn=null; R.order=null; R.bs=null; R.src=null;   // 釋放大型陣列
+  $('#ritualScene').classList.add('walk');
+  aimCurrent();
+  $('#ritualStatus').textContent='';
+  $('#rDone').hidden=false; $('#btnRitual').hidden=true;
+  rain(14,false);
+  $('#btnFinish').focus({preventScroll:true});
+  // 3.0：動畫與灰燼都結束後，才顯示「祈願儀式圓滿完成」提示框；每輪儀式只顯示一次
+  if(!R.prompted){
+    R.prompted=true;
+    R.timers.push(setTimeout(showSavePrompt, R.simple?250:700));
+  }
+}
+/* 3.0：焚燒完成提示框（沿用既有彈窗；文案固定）。
+   「保存祈願結果」直接接上既有的祝福卡 PNG 下載（buildFinalCard＋downloadCard），不另建保存機制；
+   「稍後再說」只關閉視窗：不清除祈願內容、不重設儀式與 66 隻烏龜、不重新播放燃燒。 */
+function showSavePrompt(){
+  if(state.stage!=='5' || !ritual.done) return;
+  var art='<div class="cel-art" aria-hidden="true"><span class="cel-sun">'+sunSVG(state.sunType||'smile','')+'</span></div>';   // 只留一顆太陽（用玩家自己選的樣式）置中
+  openModal({
+    title:'祈願儀式圓滿完成！',
+    cls:'celebrate',
+    body:art+'<p>你的祈願已隨著火光化為祝福。現在可以保存這份祈願結果，為這段美好的心願留下紀念。</p>',
+    actions:[
+      {label:'稍後再說', kind:'secondary'},
+      {label:'保存祈願結果', kind:'primary', onClick:saveWishResult}
+    ]
+  });
+}
+function saveWishResult(){
+  buildFinalCard();   // 以目前的祈願資料重新產生祝福卡（與第六階段相同的產生方式，不改動任何資料）
+  downloadCard();     // 沿用既有的 PNG 下載
+}
+/* 視窗大小改變：尚未開始時重畫祈願紙；進行中只更新粒子座標對應 */
+function relayoutRitual(){
+  if(ritual.running){ layoutFx(); return; }
+  if(!ritual.done) preparePaper();
+}
+function initRitual(){
+  $('#btnRitual').addEventListener('click', startRitual);
+  $('#btn5Back').addEventListener('click', function(){ goTo('4'); });
+  $('#btnFinish').addEventListener('click', function(){ goTo('6'); });
+}
+
+/* =========================================================
+   14. 第六階段：下載 PNG、重設
+   ========================================================= */
+/* 把 Blob 轉成 data: 網址 */
+function blobToDataUrl(blob){
+  return new Promise(function(resolve, reject){
+    var fr=new FileReader();
+    fr.onload=function(){ resolve(fr.result); };
+    fr.onerror=function(){ reject(new Error('read-fail')); };
+    fr.readAsDataURL(blob);
+  });
+}
+/* SVG 轉成圖片時，瀏覽器不允許載入網路字體，PNG 會退回系統字體。
+   解法：向 Google Fonts 要「剛好只含這張卡片用到的字」的精簡字體（通常只有幾十 KB），
+   轉成 data: 網址後直接嵌進 SVG。任何一步失敗都回傳原本的 SVG（改用系統字體），不會影響下載。 */
+function embedCardFont(svgStr){
+  try{
+    var doc=new DOMParser().parseFromString(svgStr,'image/svg+xml');
+    var txt=(doc.documentElement.textContent||'').replace(/\s/g,'');
+    var chars=Array.from(new Set(Array.from(txt+'0123456789'))).join('');
+    if(!chars || chars.length>900 || typeof fetch!=='function') return Promise.resolve(svgStr);
+    var cssUrl='https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@400;700&text='+encodeURIComponent(chars);
+    return fetch(cssUrl).then(function(r){
+      if(!r.ok) throw new Error('css-'+r.status);
+      return r.text();
+    }).then(function(css){
+      var urls=[], m, re=/url\(\s*['"]?([^'")\s]+)['"]?\s*\)/g;
+      while((m=re.exec(css))){ if(urls.indexOf(m[1])<0) urls.push(m[1]); }
+      if(!urls.length) throw new Error('no-font-url');
+      return Promise.all(urls.map(function(u){
+        return fetch(u).then(function(r){ if(!r.ok) throw new Error('font-'+r.status); return r.blob(); }).then(blobToDataUrl);
+      })).then(function(datas){
+        urls.forEach(function(u,i){ css=css.split(u).join(datas[i]); });
+        return svgStr.replace(/(<svg[^>]*>)/, '$1<style><![CDATA['+css+']]></style>');
+      });
+    }).catch(function(){ return svgStr; });
+  }catch(e){ return Promise.resolve(svgStr); }
+}
+/* 將 SVG 字串轉成 PNG Blob */
+function svgToPng(svgStr, w, h){
+  return new Promise(function(resolve, reject){
+    var img=new Image();
+    img.onload=function(){ setTimeout(draw, 80); };   // 稍候一下，讓嵌入的字體完成解碼再繪製
+    function draw(){
+      try{
+        var scale=Math.min(2, Math.sqrt(8000000/(w*h)));
+        var cv=document.createElement('canvas'); cv.width=Math.round(w*scale); cv.height=Math.round(h*scale);
+        var ctx=cv.getContext('2d'); if(!ctx){ reject(new Error('no-canvas')); return; }
+        ctx.fillStyle='#FFF9F0'; ctx.fillRect(0,0,cv.width,cv.height);
+        ctx.drawImage(img,0,0,cv.width,cv.height);
+        if(cv.toBlob){
+          cv.toBlob(function(b){ if(b) resolve(b); else reject(new Error('blob-null')); }, 'image/png');
+        } else {
+          var d=cv.toDataURL('image/png').split(',')[1], bin=atob(d), arr=new Uint8Array(bin.length);
+          for(var i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+          resolve(new Blob([arr],{type:'image/png'}));
+        }
+      }catch(e){ reject(e); }
+    }
+    img.onerror=function(){ reject(new Error('img-error')); };
+    img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svgStr);
+  });
+}
+/* 下載祝福卡 PNG；失敗或不支援時給友善提示 */
+function downloadCard(){
+  if(!lastCard){ toast('找不到祝福卡內容，請重新整理頁面後再試一次。'); return; }
+  var btn=$('#btn6Download'); btn.disabled=true;
+  toast('正在把祝福卡變成圖片……');
+  embedCardFont(lastCard.svgExport).then(function(svg){
+    return svgToPng(svg, lastCard.w, lastCard.h);
+  }).then(function(blob){
+    var url=URL.createObjectURL(blob), a=document.createElement('a');
+    if(!('download' in a)){
+      var wrap=document.createElement('div');
+      wrap.innerHTML='<p>你的瀏覽器不支援直接下載，請長按（或按右鍵）下方圖片，選擇「儲存圖片」。</p><p><img alt="晴天祝福卡" src="'+url+'"></p>';
+      openModal({title:'儲存你的祝福卡', body:wrap, actions:[{label:'關閉', kind:'primary'}]});
+      return;
+    }
+    a.href=url; a.download='晴天祝福卡-'+(state.date||'my')+'.png';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 8000);
+    toast('已開始下載祝福卡 PNG，請到「下載」資料夾查看。');
+  }).catch(function(){
+    toast('這個瀏覽器暫時無法產生圖片。可以試試 Chrome、Safari 或 Edge，或先用螢幕截圖保存祝福卡。');
+  }).then(function(){ btn.disabled=false; });
+}
+/* 清除所有進度，回到初始狀態 */
+function resetAll(){
+  state.date=''; state.place=''; state.start='09:00'; state.end='17:00'; state.type=''; state.typeOther='';
+  state.sunType='smile'; state.sun=null; state.celebrated=false; state.wish=DEFAULT_WISH; state.turtles.fill(false);
+  cancelCalling(); state.specials=rollSpecials(); renderTurtleGrid(); setCallStatus('');
+  F.date.value=''; F.place.value=''; F.start.value='09:00'; F.end.value='17:00'; F.type.value=''; F.typeOther.value=''; syncTypeOther();
+  submitted1=false; validate1(true);
+  ['eDate','ePlace','eTime','eType','eTypeOther'].forEach(function(id){ $('#'+id).textContent=''; });
+  [F.date,F.place,F.start,F.end,F.type,F.typeOther].forEach(function(el){ el.setAttribute('aria-invalid','false'); });
+  $('#paperWrap').classList.remove('bright'); $('#msg2').textContent=''; $('#sunPiece').innerHTML='';
+  syncPicker(); updateSunPiece(); updateStage2UI();
+  $$('#turtleGrid .turtle').forEach(function(b){ b.style.removeProperty('--dx'); b.style.removeProperty('--dy'); b.style.removeProperty('--rot'); });
+  refreshTurtles(); lastCard=null;
+  $('#ritualStatus') && ($('#ritualStatus').textContent='');
+}
+function initFinal(){
+  $('#btn6Download').addEventListener('click', downloadCard);
+  $('#btn6Restart').addEventListener('click', function(){
+    confirmBox('要重新開始嗎？','目前的祝福卡內容會被清除，建議先下載保存。確定要開始新的祈晴之旅嗎？','確定重新開始', function(){ resetAll(); goTo('1'); });
+  });
+  $('#btn6Home').addEventListener('click', function(){
+    confirmBox('要回到首頁嗎？','回到首頁後，目前的祝福卡內容會被清除，建議先下載保存。','回到首頁', function(){ resetAll(); goTo('home'); });
+  });
+}
+
+/* =========================================================
+   15. 初始化（所有事件只綁定一次）
+   ========================================================= */
+function init(){
+  buildHero(); buildPetals(); buildSteps();
+  initForm(); initSun(); initTurtles(); initWish(); initRitual(); initFinal();
+  $('#btnStart').addEventListener('click', function(){ goTo('1'); });
+  $('#btnIntro').addEventListener('click', showIntro);
+  updateCount();
+  var rzT=0;
+  function onResize(){ clearTimeout(rzT); rzT=setTimeout(function(){ aimCurrent(); if(state.stage==='5') relayoutRitual(); },140); }
+  window.addEventListener('resize', onResize);
+  window.addEventListener('orientationchange', onResize);
+  /* 手機鍵盤：輸入框取得焦點時捲到可見位置 */
+  document.addEventListener('focusin', function(e){
+    var t=e.target;
+    if(t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)){
+      setTimeout(function(){ try{ t.scrollIntoView({block:'center', behavior:reduced()?'auto':'smooth'}); }catch(_){} }, 320);
+    }
+  });
+  aimSoon();
+}
+init();
+
+})();
+</script>
+</body>
+</html>
