@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>找不到頁面｜晴天烏龜祈願所</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<style>
+  body{margin:0; min-height:100vh; display:grid; place-items:center; padding:24px; box-sizing:border-box; text-align:center;
+    font-family:'PingFang TC','Microsoft JhengHei','Noto Sans TC',system-ui,sans-serif; color:#6B5143; background:#FFF9F0}
+  h1{margin:0 0 8px; color:#4A3428; font-size:1.6rem}
+  p{margin:0 0 20px; line-height:1.7}
+  a{display:inline-block; padding:12px 26px; border-radius:999px; background:#A9C7A0; border:2.5px solid #8FB486; color:#4A3428; font-weight:800; text-decoration:none}
+  img{width:120px; height:120px; border-radius:26px; margin-bottom:16px}
+</style>
+</head>
+<body>
+  <main>
+    <img src="/apple-touch-icon.png" alt="">
+    <h1>小烏龜找不到這一頁</h1>
+    <p>這個網址可能打錯了，或頁面已經搬家。<br>回到首頁，重新開始祈晴之旅吧！</p>
+    <a id="home" href="./">回到首頁</a>
+  </main>
+  <script>
+    // 專案網站位於 /repo名稱/ 底下時，把「回到首頁」指向第一層路徑
+    (function(){
+      var seg = location.pathname.split('/')[1];
+      var isProjectSite = location.hostname.slice(-10) === '.github.io' && seg && seg.indexOf('.') < 0;
+      if (isProjectSite) {
+        var base = '/' + seg + '/';
+        document.getElementById('home').href = base;
+        document.querySelector('link[rel=icon]').href = base + 'favicon.ico';
+        document.querySelector('img').src = base + 'apple-touch-icon.png';
+      }
+    })();
+  </script>
+</body>
+</html>
