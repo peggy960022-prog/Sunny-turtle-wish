@@ -4,7 +4,7 @@
 
 以臺灣民間祈晴習俗為靈感的春日祈願小遊戲：選擇日期與地點、畫出太陽、召集 66 隻小烏龜、寫下心願，最後完成數位祈願儀式並下載專屬祝福卡（PNG）。
 
-🌐 線上遊玩：https://YOUR-USERNAME.github.io/sunny-turtle-wish/
+🌐 線上遊玩：https://peggy960022-prog.github.io/sunny-turtle-wish/
 
 > 遊戲內容僅供文化體驗與娛樂，不代表宗教儀式，也不具天氣預測或改變天氣的功能；實際天氣請以氣象預報為準。
 
