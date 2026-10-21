@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&display=swap" rel="stylesheet">
-<meta name="description" content="畫一顆太陽，陪 66 隻小烏龜一起迎接好天氣。以臺灣民間祈晴習俗為靈感的春日祈願小遊戲，完成後可下載專屬祝福卡。">
+<meta name="description" content="畫一顆太陽，陪 66 隻小烏龜一起迎接好天氣。以臺灣民間祈晴習俗為靈感的晴天祈願小遊戲，完成後可下載專屬祝福卡。">
 <meta name="application-name" content="晴天烏龜祈願所">
 <meta name="apple-mobile-web-app-title" content="晴天烏龜">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -363,7 +363,7 @@ svg[data-aim]{overflow:visible}
         <h1 id="homeTitle" tabindex="-1">晴天烏龜祈願所</h1>
         <p class="subtitle">畫一顆太陽，陪小烏龜一起迎接好天氣。</p>
       </div>
-      <div class="hero" id="hero" role="img" aria-label="春日花園插畫：微笑的太陽、飄動的白雲、草地與小花，還有四隻可愛的小烏龜"></div>
+      <div class="hero" id="hero" role="img" aria-label="晴天花園插畫：微笑的太陽、飄動的白雲、草地與小花，還有四隻可愛的小烏龜"></div>
       <div class="btn-row">
         <button type="button" class="btn secondary big" id="btnIntro">認識祈晴習俗</button>
         <button type="button" class="btn primary big" id="btnStart">開始祈晴之旅</button>
@@ -372,7 +372,7 @@ svg[data-aim]{overflow:visible}
       <p class="credit">Made with 🐢 by Peggy Lin</p>
     </section>
 
-    <!-- ===== 第一階段：春日準備 ===== -->
+    <!-- ===== 第一階段：祈晴準備 ===== -->
     <section class="stage" id="stage-1" aria-labelledby="t1">
       <div class="stage-head"><h2 id="t1" tabindex="-1">今天，你想為哪一天祈晴呢？</h2><p class="hint">先選擇你希望放晴的日子。</p></div>
       <form class="card" id="form1" novalidate>
@@ -475,7 +475,7 @@ svg[data-aim]{overflow:visible}
 
     <!-- ===== 第四階段：寫下晴天心願 ===== -->
     <section class="stage" id="stage-4" aria-labelledby="t4">
-      <div class="stage-head"><h2 id="t4" tabindex="-1">把你的小小心願，寫進春日裡。</h2><p class="hint">寫下你希望實現的心願，也可以直接使用預設祈願詞。</p></div>
+      <div class="stage-head"><h2 id="t4" tabindex="-1">把你的小小心願，寫在這裡。</h2><p class="hint">寫下你希望實現的心願，也可以直接使用預設祈願詞。</p></div>
       <div class="card">
         <dl class="info">
           <div><dt>祈願日期</dt><dd id="sDate"></dd></div>
@@ -499,7 +499,7 @@ svg[data-aim]{overflow:visible}
 
     <!-- ===== 第五階段：春日祈願儀式 ===== -->
     <section class="stage" id="stage-5" aria-labelledby="t5">
-      <div class="stage-head"><h2 id="t5" tabindex="-1">深呼吸，為自己許下一個心願。</h2><p class="hint">準備好後，開始你的春日祈願。</p></div>
+      <div class="stage-head"><h2 id="t5" tabindex="-1">深呼吸，為自己許下一個心願。</h2><p class="hint">準備好後，開始你的晴天祈願。</p></div>
       <p class="soft-note">這是遊戲內的數位象徵動畫，不需要列印，也不會真的燃燒任何東西。</p>
       <div class="ritual-scene" id="ritualScene">
         <div class="r-sky" id="rSky"></div>
@@ -528,7 +528,7 @@ svg[data-aim]{overflow:visible}
 
     <!-- ===== 第六階段：晴天祝福卡 ===== -->
     <section class="stage" id="stage-6" aria-labelledby="t6">
-      <div class="stage-head"><h2 id="t6" tabindex="-1">你的春日祈願完成了！</h2><p class="hint">這張祝福卡是你親手完成的，可以下載保存。</p></div>
+      <div class="stage-head"><h2 id="t6" tabindex="-1">你的晴天祈願完成了！</h2><p class="hint">這張祝福卡是你親手完成的，可以下載保存。</p></div>
       <div class="card-frame" id="cardHost"></div>
       <div class="btn-row">
         <button type="button" class="btn secondary" id="btn6Home">返回首頁</button>
@@ -979,7 +979,7 @@ function onEnter(id){
 /* =========================================================
    7. 首頁
    ========================================================= */
-/* 組合首頁春日花園插畫 */
+/* 組合首頁晴天花園插畫 */
 function buildHero(){
   var h='';
   h+='<div class="h-halo"></div>';
